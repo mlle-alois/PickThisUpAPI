@@ -4,14 +4,17 @@ export class DatabaseUtils {
 
     private static connection?: Connection;
 
-    static async getConnexion(): Promise<Connection> {
+    /**
+     * Connexion à la BDD
+     */
+    static async getConnection(): Promise<Connection> {
         if (!DatabaseUtils.connection) {
             DatabaseUtils.connection = await createConnection({
                 host: process.env.DB_HOST,
-                user: process.env.DB_USER,
-                password: process.env.DB_PASSWORD, // ""
                 database: process.env.DB_NAME,
-                port: Number.parseInt(process.env.DB_PORT as string) // regarder le port du serveur BDD
+                user: process.env.DB_USER,
+                password: process.env.DB_PASSWORD,
+                port: Number.parseInt(process.env.DB_PORT as string)
             });
         }
         return DatabaseUtils.connection;

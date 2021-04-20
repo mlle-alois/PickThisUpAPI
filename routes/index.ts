@@ -1,6 +1,6 @@
 import {Express} from "express";
-import {userRouter} from "./user-routes";
+import {authRouter} from "./auth-router";
 
 export function buildRoutes(app: Express) {
-    app.use("/pickthisup", userRouter);
+    app.use("/auth", authRouter);
 }

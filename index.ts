@@ -1,3 +1,5 @@
+import {config} from "dotenv";
+config();
 import express, {Express} from "express";
 import {buildRoutes} from "./routes";
 import bodyParser from "body-parser";
@@ -8,7 +10,8 @@ app.use(bodyParser.json());
 
 buildRoutes(app);
 
-const port = process.env.PORT || 5678;
+console.log(process.env.PORT)
+const port = process.env.PORT || 3000;
 
 app.listen(port, function () {
     console.log(`Listening on ${port}...`);
