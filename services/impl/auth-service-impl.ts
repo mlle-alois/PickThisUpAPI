@@ -1,8 +1,9 @@
 import {AuthService} from "../auth-service";
 import {AuthController, IUserCreationProps, SessionController, UserController} from "../../controllers";
-import {SessionModel, UserModel} from "../../models";
+import {LogError, SessionModel, UserModel} from "../../models";
 import {Connection} from "mysql2/promise";
 import {hash} from "bcrypt";
+import {UserTypeController} from "../../controllers/user-type-controller";
 
 export class AuthServiceImpl implements AuthService {
 
@@ -10,27 +11,34 @@ export class AuthServiceImpl implements AuthService {
     private userController: UserController;
     private authController: AuthController;
     private sessionController: SessionController;
+    private userTypeController: UserTypeController;
 
     constructor(connection: Connection) {
         this.connection = connection;
         this.userController = new UserController(this.connection);
         this.authController = new AuthController(this.connection);
         this.sessionController = new SessionController(this.connection);
+        this.userTypeController = new UserTypeController(this.connection);
     }
 
     /**
      * Inscription de l'utilisateur
      * @param properties -> Informations de l'utilisateur entrées en base (mot de passe haché par le code)
      */
-    async subscribe(properties: IUserCreationProps): Promise<UserModel | null> {
+    async subscribe(properties: IUserCreationProps): Promise<UserModel | LogError> {
         //vérifier que le mail est unique
-        const user = await this.userController.getUserByMail(properties.mail);
-        if (user !== null) {
-            return null;
+        const user = await this.userController.getUserByMail(properties.userMail);
+        if (!(user instanceof LogError))
+            return new LogError({numError: 409, text: "Mail is already used"});
+
+        //vérifier que le type user renseigné existe
+        const typeUser = await this.userTypeController.getUserTypeById(properties.userTypeId);
+        if(typeUser === null) {
+            return new LogError({numError: 400, text: "User type don't exists"});
         }
 
         //hachage du mot de passe
-        properties.password = await hash(properties.password, 5);
+        properties.userPassword = await hash(properties.userPassword, 5);
 
         return this.authController.createUser(properties);
     }
@@ -41,24 +49,24 @@ export class AuthServiceImpl implements AuthService {
      * @param password
      * Récupération de la session créée
      */
-    public async login(mail: string, password: string): Promise<SessionModel | null> {
+    public async login(mail: string, password: string): Promise<SessionModel | LogError> {
 
         const user = await this.userController.getUserByMailAndPassword(mail, password);
-        if (user === null || user.mail === undefined) {
-            return null;
-        }
+        if (user instanceof LogError)
+            return user;
+
         //génération de token depuis la date actuelle et le login
         const token = await hash(Date.now() + mail, 5);
 
         try {
             //suppression des anciennes sessions non fermées
-            await this.sessionController.deleteOldSessionsByUserMail(user.mail);
+            await this.sessionController.deleteOldSessionsByUserMail(mail);
 
             //création et récupération de la session
-            return await this.sessionController.createSession(await this.sessionController.getMaxSessionId() + 1, token, user.mail);
+            return await this.sessionController.createSession(await this.sessionController.getMaxSessionId() + 1, token, mail);
         } catch (err) {
             console.error(err);
-            return null;
+            return new LogError({numError: 500, text: "Connection failed"});
         }
     }
 

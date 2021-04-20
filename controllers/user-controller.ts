@@ -1,4 +1,4 @@
-import {UserModel} from "../models";
+import {LogError, UserModel} from "../models";
 import {Connection, ResultSetHeader, RowDataPacket} from "mysql2/promise";
 import {compare, hash} from 'bcrypt';
 
@@ -65,7 +65,7 @@ export class UserController {
      * Récupération d'un utilisateur depuis son :
      * @param mail
      */
-    async getUserByMail(mail: string): Promise<UserModel | null> {
+    async getUserByMail(mail: string): Promise<UserModel | LogError> {
         //récupération de l'utilisateur
         const res = await this.connection.query(`SELECT user_mail,
                                                         user_password,
@@ -94,7 +94,7 @@ export class UserController {
                 });
             }
         }
-        return null;
+        return new LogError({numError: 404, text: "User not found"});
     }
 
     /**
@@ -102,7 +102,7 @@ export class UserController {
      * @param mail
      * @param password -> non haché
      */
-    async getUserByMailAndPassword(mail: string, password: string): Promise<UserModel | null> {
+    async getUserByMailAndPassword(mail: string, password: string): Promise<UserModel | LogError> {
         const res = await this.connection.query(`SELECT user_mail,
                                                         user_password,
                                                         user_name,
@@ -122,7 +122,7 @@ export class UserController {
                 //TODO vérifier que le password est bien haché
                 const isSamePassword = await compare(password, row["user_password"]);
                 if (!isSamePassword) {
-                    return null;
+                    return new LogError({numError: 409, text: "Incorrect mail or password"});
                 }
                 return new UserModel({
                     mail: row["user_mail"],
@@ -135,7 +135,7 @@ export class UserController {
                 });
             }
         }
-        return null;
+        return new LogError({numError: 404, text: "User nor found"});
     }
 
     /**

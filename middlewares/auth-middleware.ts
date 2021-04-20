@@ -30,8 +30,7 @@ export async function authUserMiddleWare(req: express.Request, res: express.Resp
                     return;
                 }
             }
-            //Sinon updateat? to current timestampet next
-            await sessionController.updateSession(<SessionModel>session);
+            await sessionController.updateHourOfSession(session as SessionModel);
             next();
             return;
         }

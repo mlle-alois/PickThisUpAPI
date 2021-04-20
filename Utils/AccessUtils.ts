@@ -1,7 +1,7 @@
 import {DatabaseUtils} from "../database/database";
 import {SessionController, UserController} from "../controllers";
 import express from "express";
-import {SessionModel} from "../models";
+import {LogError, SessionModel} from "../models";
 import {DateUtils} from "./DateUtils";
 
 /**
@@ -28,11 +28,12 @@ export async function isConcernedUserConnected(userId: number | undefined, req: 
         const connection = await DatabaseUtils.getConnection();
         const sessionController = new SessionController(connection);
         const session = await sessionController.getSessionByToken(token);
-        if (session !== null) {
-            if (session.userId != null) {
-                if (session.userId === userId) {
-                    return true;
-                }
+        if (session instanceof LogError)
+            return false;
+
+        if (session.userId != null) {
+            if (session.userId === userId) {
+                return true;
             }
         }
     }
@@ -43,17 +44,18 @@ export async function isConcernedUserConnected(userId: number | undefined, req: 
  * récupération de l'id de l'utilisateur connecté
  * @param req
  */
-export async function getUserIdConnected(req: express.Request): Promise<number | undefined> {
+export async function getUserIdConnected(req: express.Request): Promise<number | LogError> {
     const token = getAuthorizedToken(req);
     if (token !== "") {
         const connection = await DatabaseUtils.getConnection();
         const sessionController = new SessionController(connection);
         const session = await sessionController.getSessionByToken(token);
-        if (session !== null) {
-            return session.userId;
-        }
+        if (session instanceof LogError)
+            return session;
+
+        return session.userId;
     }
-    return undefined;
+    return new LogError({numError: 404, text: "User id not found"});
 }
 
 /**

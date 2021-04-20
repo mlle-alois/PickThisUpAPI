@@ -3,7 +3,7 @@ export interface LogErrorProps {
     text: string;
 }
 
-export class LogError implements LogErrorProps{
+export class LogError implements LogErrorProps {
     numError: number;
     text: string;
 
@@ -12,7 +12,7 @@ export class LogError implements LogErrorProps{
         this.text = props.text;
     }
 
-    static HandleStatus(res:any ,log: LogError){
-        res.status(log.numError).json(log.text);
+    static HandleStatus(res: any, log: LogError) {
+        res.status(log.numError).end(log.text);
     }
 }

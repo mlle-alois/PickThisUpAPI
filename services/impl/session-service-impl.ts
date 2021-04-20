@@ -32,7 +32,7 @@ export class SessionServiceImpl implements SessionService {
      * Récupération d'une session depuis le token
      * @param token
      */
-    async getSessionByToken(token: string): Promise<SessionModel | null> {
+    async getSessionByToken(token: string): Promise<SessionModel | LogError> {
         return this.sessionController.getSessionByToken(token);
     }
 
@@ -42,7 +42,7 @@ export class SessionServiceImpl implements SessionService {
      * @param token
      * @param mail
      */
-    async createSession(sessionId: number, token: string, mail: string): Promise<SessionModel | null> {
+    async createSession(sessionId: number, token: string, mail: string): Promise<SessionModel | LogError> {
         return this.sessionController.createSession(sessionId, token, mail);
     }
 
@@ -58,7 +58,7 @@ export class SessionServiceImpl implements SessionService {
      * Suppression d'une session depuis le token
      * @param token
      */
-    async deleteSessionByToken(token: string): Promise<boolean | null> {
+    async deleteSessionByToken(token: string): Promise<boolean> {
         return this.sessionController.deleteSessionByToken(token);
     }
 
@@ -75,8 +75,8 @@ export class SessionServiceImpl implements SessionService {
      * Met à jour le champ updatedAt de la dernière session
      * @param options
      */
-    async updateSession(options: SessionModel): Promise<SessionModel | LogError | null> {
-        return this.sessionController.updateSession(options);
+    async updateSession(options: SessionModel): Promise<SessionModel | LogError> {
+        return this.sessionController.updateHourOfSession(options);
     }
 
 }

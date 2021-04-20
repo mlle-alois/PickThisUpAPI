@@ -36,9 +36,8 @@ export class SessionController {
      * Récupération d'une session depuis le token
      * @param token
      */
-    async getSessionByToken(token: string): Promise<SessionModel | null> {
+    async getSessionByToken(token: string): Promise<SessionModel | LogError> {
         //récupération de la session
-
         const res = await this.connection.query(`SELECT session_id, token, createdAt, updatedAt, deletedAt, user_id
                                                  FROM SESSION
                                                  where token = ? `, [
@@ -59,7 +58,7 @@ export class SessionController {
                 });
             }
         }
-        return null;
+        return new LogError({numError: 404, text: "Session not found"});
     }
 
     /**
@@ -68,7 +67,7 @@ export class SessionController {
      * @param token
      * @param mail
      */
-    async createSession(sessionId: number, token: string, mail: string): Promise<SessionModel | null> {
+    async createSession(sessionId: number, token: string, mail: string): Promise<SessionModel | LogError> {
         try {
             //création de la session
             await this.connection.execute(`INSERT INTO SESSION (session_id, token, createdAt, updatedAt, user_id)
@@ -82,7 +81,7 @@ export class SessionController {
             return await this.getSessionByToken(token);
         } catch (err) {
             console.error(err);
-            return null;
+            return new LogError({numError: 500, text: "Error during session creation"});
         }
     }
 
@@ -95,7 +94,7 @@ export class SessionController {
             //suppression de la session
             const res = await this.connection.query(`DELETE
                                                      FROM SESSION
-                                                     WHERE user_mail = ?`, [
+                                                     WHERE user_id = ?`, [
                 mail
             ]);
             const headers = res[0] as ResultSetHeader;
@@ -110,7 +109,7 @@ export class SessionController {
      * Suppression d'une session depuis le token
      * @param token
      */
-    async deleteSessionByToken(token: string): Promise<boolean | null> {
+    async deleteSessionByToken(token: string): Promise<boolean> {
         try {
             //suppression de la session
             const res = await this.connection.query(`DELETE
@@ -154,7 +153,7 @@ export class SessionController {
      * Met à jour le champ updatedAt de la dernière session
      * @param options
      */
-    async updateSession(options: SessionModel): Promise<SessionModel | LogError | null> {
+    async updateHourOfSession(options: SessionModel): Promise<SessionModel | LogError> {
         try {
             let actualDate = new Date();
             const res = await this.connection.execute(`UPDATE SESSION
@@ -165,7 +164,7 @@ export class SessionController {
             ]);
             const headers = res[0] as ResultSetHeader;
             if (headers.affectedRows === 1) {
-                return this.getSessionByToken(<string>options.token);
+                return this.getSessionByToken(options.token as string);
             }
             return new LogError({numError: 400, text: "The session update failed"});
         } catch (err) {

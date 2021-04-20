@@ -1,19 +1,19 @@
 export interface ISessionProps {
-    sessionId?: number;
+    sessionId: number;
     token?: string;
     createdAt?: any;
     updatedAt?: any;
     deletedAt?: any;
-    userId?: number;
+    userId: number;
 }
 
 export class SessionModel implements ISessionProps {
-    sessionId?: number;
+    sessionId: number;
     token?: string;
     createdAt?: any;
     updatedAt?: any;
     deletedAt?: any;
-    userId?: number;
+    userId: number;
 
     constructor(properties: ISessionProps) {
         this.sessionId = properties.sessionId;

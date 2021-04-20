@@ -5,6 +5,8 @@ import {AuthController} from "../controllers";
 import {SessionController} from "../controllers";
 import {AuthServiceImpl} from "../services/impl/auth-service-impl";
 import {SessionServiceImpl} from "../services/impl/session-service-impl";
+import {LogError} from "../models";
+import {getAuthorizedToken} from "../Utils";
 
 const authRouter = express.Router();
 
@@ -33,20 +35,23 @@ authRouter.post("/subscribe", async function (req, res) {
     const authService = new AuthServiceImpl(connection);
 
     const user = await authService.subscribe({
-        mail,
-        password,
-        name,
-        firstname,
-        phoneNumber,
-        typeId
+        userMail: mail,
+        userPassword: password,
+        userName: name,
+        userFirstname: firstname,
+        userPhoneNumber: phoneNumber,
+        userTypeId: typeId
     });
 
+    if (user instanceof LogError)
+        return LogError.HandleStatus(res, user);
+
     const session = await authService.login(mail, password);
-    if (user !== null && session !== null) {
+    if (session instanceof LogError) {
+        LogError.HandleStatus(res, session);
+    } else {
         res.status(201);
         res.json({user, session});
-    } else {
-        res.status(400).end();
     }
 });
 
@@ -78,7 +83,7 @@ authRouter.post("/login", async function (req, res) {
 
 /**
  * déconnexion d'un utilisateur
- * URL : auth/logout?token=$2b$05$eiTDmmFGXYluk1RBXOKAD.r1GD8jT4naaeO5dL8D9ea/Jg//dVt6a
+ * URL : auth/logout
  * Requete : DELETE
  * ACCES : Tous
  * Nécessite d'être connecté : OUI
@@ -86,7 +91,7 @@ authRouter.post("/login", async function (req, res) {
 authRouter.delete("/logout", authUserMiddleWare, async function (req, res) {
     const connection = await DatabaseUtils.getConnection();
     const sessionService = new SessionServiceImpl(connection);
-    const token = req.query.token ? req.query.token as string : "";
+    const token = getAuthorizedToken(req);
     if(token === "") {
         res.status(400).end;
     }
