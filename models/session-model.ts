@@ -4,7 +4,7 @@ export interface ISessionProps {
     createdAt?: any;
     updatedAt?: any;
     deletedAt?: any;
-    userId: number;
+    userId: string;
 }
 
 export class SessionModel implements ISessionProps {
@@ -13,7 +13,7 @@ export class SessionModel implements ISessionProps {
     createdAt?: any;
     updatedAt?: any;
     deletedAt?: any;
-    userId: number;
+    userId: string;
 
     constructor(properties: ISessionProps) {
         this.sessionId = properties.sessionId;

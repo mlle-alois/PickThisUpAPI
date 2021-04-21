@@ -13,33 +13,28 @@ import {LogError, SessionModel} from "../models";
  */
 export async function authUserMiddleWare(req: express.Request, res: express.Response, next: express.NextFunction) {
     const token = getAuthorizedToken(req);
-    if(token !== "") {
+    if (token !== "") {
         const connection = await DatabaseUtils.getConnection();
         const sessionController = new SessionController(connection);
         const session = await sessionController.getSessionByToken(token);
 
-        if(session !== null) {
-            // check si expiré
-            if (isTokenExpired(<SessionModel>session, 2)) {
-                // Si oui DELETE
-                if ( await sessionController.deleteSessionByToken(token)) {
-                    LogError.HandleStatus(res, {
-                        numError: 408,
-                        text: "Session expirée"
-                    });
-                    return;
-                }
+        if (session instanceof LogError)
+            return LogError.HandleStatus(res, session);
+
+        // check si expiré
+        if (isTokenExpired(session, 2)) {
+            // Si oui DELETE
+            if (await sessionController.deleteSessionByToken(token)) {
+                LogError.HandleStatus(res, {
+                    numError: 408,
+                    text: "Session expirée"
+                });
+                return;
             }
-            await sessionController.updateHourOfSession(session as SessionModel);
-            next();
-            return;
         }
-        else {
-            LogError.HandleStatus(res, {
-                numError: 403,
-                text: "Aucune session associée à ce token"
-            });
-        }
+        await sessionController.updateHourOfSession(session as SessionModel);
+        next();
+        return;
     } else {
         LogError.HandleStatus(res, {
             numError: 401,
