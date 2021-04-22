@@ -119,7 +119,6 @@ export class UserController {
             const rows = data as RowDataPacket[];
             if (rows.length > 0) {
                 const row = rows[0];
-                //TODO vérifier que le password est bien haché
                 const isSamePassword = await compare(password, row["user_password"]);
                 if (!isSamePassword) {
                     return new LogError({numError: 409, text: "Incorrect mail or password"});

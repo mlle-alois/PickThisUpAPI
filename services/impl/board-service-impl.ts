@@ -6,14 +6,10 @@ import {BoardService} from "../board-service";
 export class BoardServiceImpl implements BoardService {
 
     private connection: Connection;
-    private userController: UserController;
-    private authController: AuthController;
     private boardController: BoardController;
 
     constructor(connection: Connection) {
         this.connection = connection;
-        this.userController = new UserController(this.connection);
-        this.authController = new AuthController(this.connection);
         this.boardController = new BoardController(this.connection);
     }
 
