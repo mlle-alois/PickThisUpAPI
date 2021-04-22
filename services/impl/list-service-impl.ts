@@ -1,4 +1,4 @@
-import {AuthController, ListController, ListGetAllOptions, UserController} from "../../controllers";
+import {ListController, ListGetAllOptions} from "../../controllers";
 import {LogError, ListModel} from "../../models";
 import {Connection} from "mysql2/promise";
 import {ListService} from "../list-service";
@@ -7,6 +7,7 @@ import {BoardServiceImpl} from "./board-service-impl";
 export interface ListUpdateProps {
     listId: number;
     listName: string;
+    positionInBoard?: number;
     boardId: number;
 }
 
@@ -74,19 +75,32 @@ export class ListServiceImpl implements ListService {
 
     /**
      * Modification des informations d'une liste renseignées dans les options
+     * En cas de modification de tableau, la position dans le tableau est modifiée à la plus élevée existante
      * @param options
      */
     async updateList(options: ListUpdateProps): Promise<ListModel | LogError> {
-        //TODO permettre de faire des modifications sans saisir les valeurs à controles
         const list = await this.listController.getListById(options.listId);
         if (list instanceof LogError)
             return new LogError({numError: 404, text: "List not exists"});
 
-        const board = await this.boardService.getBoardById(options.boardId);
-        if (board instanceof LogError)
-            return new LogError({numError: 404, text: "Board not exists"});
+        if(options.boardId !== undefined) {
+            const board = await this.boardService.getBoardById(options.boardId);
+            if (board instanceof LogError)
+                return new LogError({numError: 404, text: "Board not exists"});
 
-        return await this.listController.updateList(options);
+            const positionInBoard = await this.getMaxPositionInBoardById(options.boardId);
+            if(positionInBoard instanceof LogError)
+                return positionInBoard;
+
+            options.positionInBoard = positionInBoard + 1;
+        }
+
+        const update = await this.listController.updateList(options);
+
+        if(options.boardId !== undefined)
+            await this.reorderPositionsInBoard(list.boardId, list.positionInBoard as number);
+
+        return update;
     }
 
     /**

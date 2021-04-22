@@ -119,6 +119,8 @@ export class ListController {
         if (options.boardId !== undefined) {
             setClause.push("board_id = ?");
             params.push(options.boardId);
+            setClause.push("position_in_board = ?");
+            params.push(options.positionInBoard);
         }
         params.push(options.listId);
         try {

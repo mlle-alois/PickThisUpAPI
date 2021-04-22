@@ -22,15 +22,13 @@ listRouter.post("/add", authUserMiddleWare, async function (req, res) {
 
         const id = await listService.getMaxListId() + 1;
         const name = req.body.name;
-        const boardId = Number.parseInt(req.body.boardId);
+        const boardId = req.body.boardId;
 
-        if (name === undefined || boardId === undefined) {
-            res.status(400).end("Veuillez renseigner les informations nécessaires");
-            return;
-        }
+        if (name === undefined || boardId === undefined)
+            return res.status(400).end("Veuillez renseigner les informations nécessaires");
 
         const positionInBoard = await listService.getMaxPositionInBoardById(boardId);
-        if(positionInBoard instanceof LogError)
+        if (positionInBoard instanceof LogError)
             return LogError.HandleStatus(res, positionInBoard);
 
         const list = await listService.createList({
@@ -88,7 +86,12 @@ listRouter.get("/:id", authUserMiddleWare, async function (req, res) {
         const connection = await DatabaseUtils.getConnection();
         const listService = new ListServiceImpl(connection);
 
-        const list = await listService.getListById(Number.parseInt(req.params.id));
+        const id = req.params.id;
+
+        if (id === undefined)
+            return res.status(400).end("Veuillez renseigner les informations nécessaires");
+
+        const list = await listService.getListById(Number.parseInt(id));
         if (list instanceof LogError)
             LogError.HandleStatus(res, list);
         else
@@ -107,9 +110,9 @@ listRouter.get("/:id", authUserMiddleWare, async function (req, res) {
 listRouter.put("/update/:id", authUserMiddleWare, async function (req, res) {
     //vérification droits d'accès
     if (await isDevConnected(req)) {
-        const id = Number.parseInt(req.params.id);
+        const id = req.params.id;
         const name = req.body.name;
-        const boardId = Number.parseInt(req.body.boardId);
+        const boardId = req.body.boardId;
 
         if (id === undefined || (name === undefined && boardId === undefined)) {
             res.status(400).end("Veuillez renseigner les informations nécessaires");
@@ -119,7 +122,7 @@ listRouter.put("/update/:id", authUserMiddleWare, async function (req, res) {
         const listService = new ListServiceImpl(connection);
 
         const list = await listService.updateList({
-            listId: id,
+            listId: Number.parseInt(id),
             listName: name,
             boardId
         });
@@ -142,8 +145,8 @@ listRouter.put("/update/:id", authUserMiddleWare, async function (req, res) {
 listRouter.put("/update-position/:id", authUserMiddleWare, async function (req, res) {
     //vérification droits d'accès
     if (await isDevConnected(req)) {
-        const id = Number.parseInt(req.params.id);
-        const positionInBoard = Number.parseInt(req.body.position);
+        const id = req.params.id;
+        const positionInBoard = req.body.position;
 
         if (id === undefined || positionInBoard === undefined) {
             res.status(400).end("Veuillez renseigner les informations nécessaires");
@@ -152,7 +155,7 @@ listRouter.put("/update-position/:id", authUserMiddleWare, async function (req, 
         const connection = await DatabaseUtils.getConnection();
         const listService = new ListServiceImpl(connection);
 
-        const success = await listService.updatePositionInBoardList(id, positionInBoard);
+        const success = await listService.updatePositionInBoardList(Number.parseInt(id), positionInBoard);
 
         if (success)
             res.status(204).end();
@@ -175,7 +178,12 @@ listRouter.delete("/:id", authUserMiddleWare, async function (req, res) {
         const connection = await DatabaseUtils.getConnection();
         const listService = new ListServiceImpl(connection);
 
-        const success = await listService.deleteListById(Number.parseInt(req.params.id));
+        const id = req.params.id;
+
+        if (id === undefined)
+            return res.status(400).end("Veuillez renseigner les informations nécessaires");
+
+        const success = await listService.deleteListById(Number.parseInt(id));
         if (success)
             res.status(204).end();
         else

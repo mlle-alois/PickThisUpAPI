@@ -81,7 +81,12 @@ boardRouter.get("/:id", authUserMiddleWare, async function (req, res) {
         const connection = await DatabaseUtils.getConnection();
         const boardService = new BoardServiceImpl(connection);
 
-        const board = await boardService.getBoardById(Number.parseInt(req.params.id));
+        const id = req.params.id;
+
+        if(id === undefined)
+            return res.status(400).end("Veuillez renseigner les informations nécessaires");
+
+        const board = await boardService.getBoardById(Number.parseInt(id));
         if (board instanceof LogError)
             LogError.HandleStatus(res, board);
         else
@@ -100,7 +105,7 @@ boardRouter.get("/:id", authUserMiddleWare, async function (req, res) {
 boardRouter.put("/:id", authUserMiddleWare, async function (req, res) {
     //vérification droits d'accès
     if (await isDevConnected(req)) {
-        const id = Number.parseInt(req.params.id);
+        const id = req.params.id;
         const name = req.body.name;
 
         //invalide s'il n'y a pas d'id ou qu'aucune option à modifier n'est renseignée
@@ -112,7 +117,7 @@ boardRouter.put("/:id", authUserMiddleWare, async function (req, res) {
         const boardService = new BoardServiceImpl(connection);
 
         const board = await boardService.updateBoard({
-            boardId: id,
+            boardId: Number.parseInt(id),
             boardName: name,
         });
 
@@ -137,7 +142,12 @@ boardRouter.delete("/:id", authUserMiddleWare, async function (req, res) {
         const connection = await DatabaseUtils.getConnection();
         const boardService = new BoardServiceImpl(connection);
 
-        const success = await boardService.deleteBoardsById(Number.parseInt(req.params.id));
+        const id = req.params.id;
+
+        if(id === undefined)
+            return res.status(400).end("Veuillez renseigner les informations nécessaires");
+
+        const success = await boardService.deleteBoardsById(Number.parseInt(id));
         if (success)
             res.status(204).end();
         else
