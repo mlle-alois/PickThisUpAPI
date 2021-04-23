@@ -2,7 +2,7 @@ import {LogError, UserModel} from "../models";
 import {Connection, ResultSetHeader, RowDataPacket} from "mysql2/promise";
 import {compare, hash} from 'bcrypt';
 
-interface UserGetAllOptions {
+export interface UserGetAllOptions {
     limit?: number;
     offset?: number;
 }
@@ -145,7 +145,7 @@ export class UserController {
         try {
             const res = await this.connection.query(`DELETE FROM USER WHERE user_id = ${userId}`);
             const headers = res[0] as ResultSetHeader;
-            return headers.affectedRows === 1;
+            return headers.affectedRows > 0;
         } catch (err) {
             console.error(err);
             return false;
@@ -189,7 +189,7 @@ export class UserController {
         try {
             const res = await this.connection.execute(`UPDATE USER SET ${setClause.join(", ")} WHERE user_id = ?`, params);
             const headers = res[0] as ResultSetHeader;
-            if (headers.affectedRows === 1) {
+            if (headers.affectedRows > 0) {
                 return this.getUserByMail(options.mail);
             }
             return null;

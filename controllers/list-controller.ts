@@ -1,10 +1,16 @@
 import {ListModel, LogError} from "../models";
 import {Connection, ResultSetHeader, RowDataPacket} from "mysql2/promise";
-import {ListUpdateProps} from "../services/impl";
 
 export interface ListGetAllOptions {
     limit?: number;
     offset?: number;
+}
+
+export interface ListUpdateProps {
+    listId: number;
+    listName: string;
+    positionInBoard?: number;
+    boardId: number;
 }
 
 export class ListController {
@@ -101,7 +107,7 @@ export class ListController {
                 listId
             ]);
             const headers = res[0] as ResultSetHeader;
-            return headers.affectedRows === 1;
+            return headers.affectedRows > 0;
         } catch (err) {
             console.error(err);
             return false;
@@ -126,7 +132,7 @@ export class ListController {
         try {
             const res = await this.connection.execute(`UPDATE LIST SET ${setClause.join(", ")} WHERE list_id = ?`, params);
             const headers = res[0] as ResultSetHeader;
-            if (headers.affectedRows === 1) {
+            if (headers.affectedRows > 0) {
                 return this.getListById(options.listId);
             }
             return new LogError({numError: 400, text: "The list update failed"});
@@ -158,7 +164,7 @@ export class ListController {
         return 0;
     }
 
-    async reorderPositionsInBoard(listId: number, positionDeleted: number): Promise<boolean> {
+    async reorderPositionsInBoardAfterDeleted(listId: number, positionDeleted: number): Promise<boolean> {
         const res = await this.connection.query(`UPDATE LIST
                                                  SET position_in_board = position_in_board - 1
                                                  WHERE board_id = ?
@@ -167,7 +173,7 @@ export class ListController {
             positionDeleted
         ]);
         const headers = res[0] as ResultSetHeader;
-        return headers.affectedRows === 1;
+        return headers.affectedRows > 0;
 
     }
 

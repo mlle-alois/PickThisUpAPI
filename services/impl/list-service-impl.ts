@@ -1,15 +1,8 @@
-import {ListController, ListGetAllOptions} from "../../controllers";
+import {ListController, ListGetAllOptions, ListUpdateProps} from "../../controllers";
 import {LogError, ListModel} from "../../models";
 import {Connection} from "mysql2/promise";
 import {ListService} from "../list-service";
 import {BoardServiceImpl} from "./board-service-impl";
-
-export interface ListUpdateProps {
-    listId: number;
-    listName: string;
-    positionInBoard?: number;
-    boardId: number;
-}
 
 export class ListServiceImpl implements ListService {
 
@@ -70,7 +63,7 @@ export class ListServiceImpl implements ListService {
         if (!await this.listController.deleteListsById(listId))
             return false;
 
-        return await this.reorderPositionsInBoard(list.boardId, list.positionInBoard);
+        return await this.reorderPositionsInBoardAfterDeleted(list.boardId, list.positionInBoard);
     }
 
     /**
@@ -98,7 +91,7 @@ export class ListServiceImpl implements ListService {
         const update = await this.listController.updateList(options);
 
         if(options.boardId !== undefined)
-            await this.reorderPositionsInBoard(list.boardId, list.positionInBoard as number);
+            await this.reorderPositionsInBoardAfterDeleted(list.boardId, list.positionInBoard as number);
 
         return update;
     }
@@ -137,13 +130,13 @@ export class ListServiceImpl implements ListService {
      * @param boardId
      * @param positionDeleted
      */
-    async reorderPositionsInBoard(boardId: number, positionDeleted: number): Promise<boolean> {
+    async reorderPositionsInBoardAfterDeleted(boardId: number, positionDeleted: number): Promise<boolean> {
         const board = await this.boardService.getBoardById(boardId);
         if (board instanceof LogError)
             return false;
 
         if (positionDeleted !== 0) {
-            return await this.listController.reorderPositionsInBoard(boardId, positionDeleted);
+            return await this.listController.reorderPositionsInBoardAfterDeleted(boardId, positionDeleted);
         }
         return true;
     }

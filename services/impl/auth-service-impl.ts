@@ -3,19 +3,21 @@ import {AuthController, IUserCreationProps, SessionController, UserController} f
 import {LogError, SessionModel, UserModel} from "../../models";
 import {Connection} from "mysql2/promise";
 import {hash} from "bcrypt";
-import {UserTypeController} from "../../controllers/user-type-controller";
+import {UserTypeController} from "../../controllers";
+import {UserService} from "../user-service";
+import {UserServiceImpl} from "./user-service-impl";
 
 export class AuthServiceImpl implements AuthService {
 
     private connection: Connection;
-    private userController: UserController;
+    private userService: UserService;
     private authController: AuthController;
     private sessionController: SessionController;
     private userTypeController: UserTypeController;
 
     constructor(connection: Connection) {
         this.connection = connection;
-        this.userController = new UserController(this.connection);
+        this.userService = new UserServiceImpl(this.connection);
         this.authController = new AuthController(this.connection);
         this.sessionController = new SessionController(this.connection);
         this.userTypeController = new UserTypeController(this.connection);
@@ -27,7 +29,7 @@ export class AuthServiceImpl implements AuthService {
      */
     async subscribe(properties: IUserCreationProps): Promise<UserModel | LogError> {
         //vérifier que le mail est unique
-        const user = await this.userController.getUserByMail(properties.userMail);
+        const user = await this.userService.getUserByMail(properties.userMail);
         if (!(user instanceof LogError))
             return new LogError({numError: 409, text: "Mail is already used"});
 
@@ -51,7 +53,7 @@ export class AuthServiceImpl implements AuthService {
      */
     public async login(mail: string, password: string): Promise<SessionModel | LogError> {
 
-        const user = await this.userController.getUserByMailAndPassword(mail, password);
+        const user = await this.userService.getUserByMailAndPassword(mail, password);
         if (user instanceof LogError)
             return user;
 

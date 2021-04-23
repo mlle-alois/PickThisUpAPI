@@ -1,7 +1,5 @@
-import {UserModel, UserTypeModel} from "../models";
+import {LogError, UserTypeModel} from "../models";
 import {Connection, RowDataPacket} from "mysql2/promise";
-import {UserController} from "./user-controller";
-import {SessionController} from "./session-controller";
 
 export class UserTypeController {
 
@@ -15,7 +13,7 @@ export class UserTypeController {
      * Récupération d'un type utilisateur depuis son :
      * @param userTypeId
      */
-    async getUserTypeById(userTypeId: number): Promise<UserTypeModel | null> {
+    async getUserTypeById(userTypeId: number): Promise<UserTypeModel | LogError> {
         const res = await this.connection.query(`SELECT user_type_id,
                                                         user_type_libelle
                                                  FROM USER_TYPE
@@ -33,6 +31,6 @@ export class UserTypeController {
                 });
             }
         }
-        return null;
+        return new LogError({numError: 404, text: "User type not found"});
     }
 }

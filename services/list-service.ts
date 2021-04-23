@@ -1,6 +1,5 @@
-import {LogError, ListModel, UserModel} from "../models";
-import {ListGetAllOptions, IUserCreationProps} from "../controllers";
-import {ListUpdateProps} from "./impl";
+import {LogError, ListModel} from "../models";
+import {ListGetAllOptions, ListUpdateProps} from "../controllers";
 
 export interface ListService {
 
@@ -19,4 +18,6 @@ export interface ListService {
     updatePositionInBoardList(listId: number, positionInBoard: number): Promise<boolean>;
 
     getMaxPositionInBoardById(boardId: number): Promise<number | LogError>;
+
+    reorderPositionsInBoardAfterDeleted(boardId: number, positionDeleted: number): Promise<boolean>;
 }

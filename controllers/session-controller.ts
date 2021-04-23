@@ -98,7 +98,7 @@ export class SessionController {
                 mail
             ]);
             const headers = res[0] as ResultSetHeader;
-            return headers.affectedRows === 1;
+            return headers.affectedRows > 0;
         } catch (err) {
             console.error(err);
             return false;
@@ -118,7 +118,7 @@ export class SessionController {
                 token
             ]);
             const headers = res[0] as ResultSetHeader;
-            return headers.affectedRows === 1;
+            return headers.affectedRows > 0;
         } catch (err) {
             console.error(err);
             return false;
@@ -163,7 +163,7 @@ export class SessionController {
                 options.token
             ]);
             const headers = res[0] as ResultSetHeader;
-            if (headers.affectedRows === 1) {
+            if (headers.affectedRows > 0) {
                 return this.getSessionByToken(options.token as string);
             }
             return new LogError({numError: 400, text: "The session update failed"});

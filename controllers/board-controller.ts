@@ -96,7 +96,7 @@ export class BoardController {
                 boardId
             ]);
             const headers = res[0] as ResultSetHeader;
-            return headers.affectedRows === 1;
+            return headers.affectedRows > 0;
         } catch (err) {
             console.error(err);
             return false;
@@ -115,7 +115,7 @@ export class BoardController {
         try {
             const res = await this.connection.execute(`UPDATE BOARD SET ${setClause.join(", ")} WHERE board_id = ?`, params);
             const headers = res[0] as ResultSetHeader;
-            if (headers.affectedRows === 1) {
+            if (headers.affectedRows > 0) {
                 return this.getBoardById(options.boardId);
             }
             return new LogError({numError: 400, text: "The board update failed"});
