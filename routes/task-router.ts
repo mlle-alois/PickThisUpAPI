@@ -130,9 +130,9 @@ taskRouter.put("/update/:id", authUserMiddleWare, async function (req, res) {
         const id = req.params.id;
         const name = req.body.name;
         const description = req.body.description;
-        const deadline = req.body.deadline ? req.body.deadline : null;
-        const statusId = req.body.statusId ? req.body.statusId : null;
-        const priorityId = req.body.priorityId ? req.body.priorityId : null;
+        const deadline = req.body.deadline;
+        const statusId = req.body.statusId;
+        const priorityId = req.body.priorityId;
         const listId = req.body.listId;
 
         if (id === undefined || (name === undefined && description === undefined &&

@@ -5,5 +5,6 @@ export * from './priority-service';
 export * from './session-service';
 export * from './status-service';
 export * from './task-service';
+export * from './ticket-service';
 export * from './user-service';
 export * from './user-type-service';

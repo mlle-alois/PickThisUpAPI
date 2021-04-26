@@ -5,5 +5,6 @@ export * from './priority-model';
 export * from './session-model';
 export * from './status-model';
 export * from './task-model';
+export * from './ticket-model';
 export * from './user-model';
 export * from './user-type-model';
