@@ -20,4 +20,6 @@ export interface ListService {
     getMaxPositionInBoardById(boardId: number): Promise<number | LogError>;
 
     reorderPositionsInBoardAfterDeleted(boardId: number, positionDeleted: number): Promise<boolean>;
+
+    getListByBoardId(boardId: number): Promise<ListModel[] | LogError>;
 }

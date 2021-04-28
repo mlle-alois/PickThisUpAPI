@@ -232,4 +232,26 @@ export class ListController {
         }
         return false;
     }
+
+
+    async getListByBoardId(boardId: number): Promise<ListModel[] | LogError> {
+        const res = await this.connection.query(`SELECT list_id, list_name, position_in_board, board_id
+                                                 FROM LIST
+                                                 where board_id = ?`, [
+            boardId
+        ]);
+        const data = res[0];
+        if (Array.isArray(data)) {
+            return (data as RowDataPacket[]).map(function (row: any) {
+                return new ListModel({
+                    listId: row["list_id"],
+                    listName: row["list_name"],
+                    positionInBoard: row["position_in_board"],
+                    boardId: row["board_id"]
+                });
+            });
+            }
+
+        return new LogError({numError: 404, text: "List not found"});
+    }
 }

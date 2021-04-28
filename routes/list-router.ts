@@ -100,6 +100,35 @@ listRouter.get("/:id", authUserMiddleWare, async function (req, res) {
     res.status(403).end();
 });
 
+
+/**
+ * récupération de toutes les listes lié à un board id
+ * URL : /list/board/:id
+ * Requete : GET
+ * ACCES : DEVELOPPEUR
+ * Nécessite d'être connecté : OUI
+ */
+listRouter.get("/board/:id", authUserMiddleWare, async function (req, res) {
+    //vérification droits d'accès
+    if (await isDevConnected(req)) {
+        const connection = await DatabaseUtils.getConnection();
+        const listService = new ListServiceImpl(connection);
+
+        const id = req.params.id;
+
+        if (id === undefined)
+            return res.status(400).end("Veuillez renseigner les informations nécessaires");
+
+        const list = await listService.getListByBoardId(Number.parseInt(id));
+        if (list instanceof LogError)
+            LogError.HandleStatus(res, list);
+        else
+            res.json(list);
+    }
+    res.status(403).end();
+});
+
+
 /**
  * modification d'un liste selon son id
  * URL : /list/update/:id
