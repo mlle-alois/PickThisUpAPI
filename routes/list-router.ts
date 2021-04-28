@@ -102,7 +102,7 @@ listRouter.get("/:id", authUserMiddleWare, async function (req, res) {
 
 
 /**
- * récupération d'un liste selon son id
+ * récupération de toutes les listes lié à un board id
  * URL : /list/board/:id
  * Requete : GET
  * ACCES : DEVELOPPEUR
