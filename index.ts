@@ -5,7 +5,9 @@ import {buildRoutes} from "./routes";
 import bodyParser from "body-parser";
 
 const app: Express = express();
+const cors = require('cors');
 
+app.use(cors());
 app.use(bodyParser.json());
 
 buildRoutes(app);

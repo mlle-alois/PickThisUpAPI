@@ -7,6 +7,7 @@ import {AuthServiceImpl} from "../services/impl/auth-service-impl";
 import {SessionServiceImpl} from "../services/impl/session-service-impl";
 import {LogError} from "../models";
 import {getAuthorizedToken} from "../Utils";
+import {UserServiceImpl} from "../services/impl";
 
 const authRouter = express.Router();
 
@@ -73,11 +74,34 @@ authRouter.post("/login", async function (req, res) {
     const authService = new AuthServiceImpl(connection);
 
     const session = await authService.login(mail, password);
-    if(session === null) {
-        res.status(404).end();
-        return;
+    if(session instanceof LogError) {
+        return LogError.HandleStatus(res, session);
     } else {
         res.json(session);
+    }
+});
+
+/**
+ * récupération d'un utilisateur selon son mail (pour pouvoir réinitialiser son mot de passe s'il existe)
+ * URL : auth/forgot-password
+ * Requete : GET
+ * ACCES : Tous
+ * Nécessite d'être connecté : NON
+ */
+authRouter.get("/forgot-password", async function (req, res) {
+    const mail = req.body.mail;
+    if (mail === undefined) {
+        res.status(400).end();
+        return;
+    }
+    const connection = await DatabaseUtils.getConnection();
+    const userService = new UserServiceImpl(connection);
+
+    const user = await userService.getUserByMail(mail);
+    if(user instanceof LogError) {
+        return LogError.HandleStatus(res, user);
+    } else {
+        res.json(user);
     }
 });
 
