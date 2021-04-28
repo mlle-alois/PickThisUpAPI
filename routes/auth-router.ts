@@ -83,13 +83,14 @@ authRouter.post("/login", async function (req, res) {
 
 /**
  * récupération d'un utilisateur selon son mail (pour pouvoir réinitialiser son mot de passe s'il existe)
- * URL : auth/forgot-password
+ * URL : auth/forgot-password?mail={x}
  * Requete : GET
  * ACCES : Tous
  * Nécessite d'être connecté : NON
  */
 authRouter.get("/forgot-password", async function (req, res) {
-    const mail = req.body.mail;
+    //TODO récupérer via le body possible ?
+    const mail = req.query.mail as string;
     if (mail === undefined) {
         res.status(400).end();
         return;
