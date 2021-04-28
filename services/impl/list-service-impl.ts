@@ -141,4 +141,11 @@ export class ListServiceImpl implements ListService {
         return true;
     }
 
+    /**
+     * Récupère toutes les listes liés aux boards id
+     * @param boardId
+     */
+   async getListByBoardId(boardId: number): Promise<ListModel[] | LogError>{
+        return this.listController.getListByBoardId(boardId);
+   }
 }
