@@ -2,8 +2,9 @@ import express from "express";
 import {DatabaseUtils} from "../database/database";
 import {authUserMiddleWare} from "../middlewares/auth-middleware";
 import {DateUtils, getUserMailConnected, isDevConnected} from "../Utils";
-import {TicketServiceImpl} from "../services/impl";
+import {StatusServiceImpl, TicketServiceImpl} from "../services/impl";
 import {LogError} from "../models";
+
 
 const ticketRouter = express.Router();
 
@@ -286,6 +287,31 @@ ticketRouter.get("/search", authUserMiddleWare, async function (req, res) {
             LogError.HandleStatus(res, tickets);
         else
             res.json(tickets);
+    }
+    res.status(403).end();
+});
+
+/**
+ * récupération de tous les status des tickets
+ * URL : /ticket/status?[limit={x}&offset={x}]
+ * Requete : GET
+ * ACCES : DEVELOPPEUR
+ * Nécessite d'être connecté : OUI
+ */
+ticketRouter.get("/status", authUserMiddleWare, async function (req, res) {
+    //vérification droits d'accès
+    if (await isDevConnected(req)) {
+        const connection = await DatabaseUtils.getConnection();
+        const statusService = new StatusServiceImpl(connection);
+
+        const limit = req.query.limit ? Number.parseInt(req.query.limit as string) : undefined;
+        const offset = req.query.offset ? Number.parseInt(req.query.offset as string) : undefined;
+
+        const status = await statusService.getAllStatus({
+            limit,
+            offset
+        });
+        res.json(status);
     }
     res.status(403).end();
 });

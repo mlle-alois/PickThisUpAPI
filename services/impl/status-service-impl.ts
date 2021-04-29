@@ -1,7 +1,7 @@
 import {LogError, StatusModel} from "../../models";
 import {Connection} from "mysql2/promise";
 import {StatusService} from "../status-service";
-import {StatusController} from "../../controllers";
+import {StatusController, StatusGetAllOptions} from "../../controllers";
 
 export class StatusServiceImpl implements StatusService {
 
@@ -19,5 +19,13 @@ export class StatusServiceImpl implements StatusService {
      */
     getStatusById(statusId: number): Promise<StatusModel | LogError> {
         return this.statusController.getStatusById(statusId);
+    }
+
+    /**
+     * Récupération de tous les status possibles des tâches
+     * @param options
+     */
+    getAllStatus(options?: StatusGetAllOptions): Promise<StatusModel[]> {
+        return this.statusController.getAllStatus(options);
     }
 }
