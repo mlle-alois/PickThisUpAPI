@@ -22,7 +22,7 @@ export class StatusServiceImpl implements StatusService {
     }
 
     /**
-     * Récupération de tous les status possibles des tâches
+     * Récupération de tous les status possibles des tickets
      * @param options
      */
     getAllStatus(options?: StatusGetAllOptions): Promise<StatusModel[]> {
