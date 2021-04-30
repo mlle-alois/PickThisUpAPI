@@ -5,10 +5,12 @@ import {listRouter} from "./list-router";
 import {taskRouter} from "./task-router";
 import {ticketRouter} from "./ticket-router";
 
+
 export function buildRoutes(app: Express) {
     app.use("/auth", authRouter);
     app.use("/board", boardRouter);
     app.use("/list", listRouter);
     app.use("/task", taskRouter);
     app.use("/ticket", ticketRouter);
+
 }
