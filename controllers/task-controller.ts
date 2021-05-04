@@ -290,4 +290,45 @@ export class TaskController {
         }
         return false;
     }
+
+    async getAllTasksFromList(listId:number, options?: TaskGetAllOptions): Promise<TaskModel[] | LogError> {
+        const limit = options?.limit || 20;
+        const offset = options?.offset || 0;
+
+        const res = await this.connection.query(`SELECT task_id,
+                                                        task_name,
+                                                        task_description,
+                                                        task_creation_date,
+                                                        task_deadline,
+                                                        position_in_list,
+                                                        status_id,
+                                                        priority_id,
+                                                        list_id,
+                                                        creator_id
+                                                 FROM TASK WHERE list_id = ? LIMIT ?, ?`, [
+            listId,offset, limit
+        ]);
+        const data = res[0];
+        if (Array.isArray(data)) {
+            if (data.length === 0)
+                return new LogError({ numError: 404, text: "No tasks found "});
+
+            return (data as RowDataPacket[]).map(function (row: any) {
+                return new TaskModel({
+                    taskId: row["task_id"],
+                    taskName: row["task_name"],
+                    taskDescription: row["task_description"],
+                    taskCreationDate: row["task_creation_date"],
+                    taskDeadline: row["task_deadline"],
+                    positionInList: row["position_in_list"],
+                    statusId: row["status_id"],
+                    priorityId: row["priority_id"],
+                    listId: row["list_id"],
+                    creatorId: row["creator_id"]
+                });
+            });
+        }
+        return new LogError({ numError: 404, text: "No tasks found "});
+    }
+
 }

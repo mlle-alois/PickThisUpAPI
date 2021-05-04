@@ -219,6 +219,39 @@ taskRouter.delete("/:id", authUserMiddleWare, async function (req, res) {
     res.status(403).end();
 });
 
+/**
+ * URL : /task/:id?limit={x}&offset={x}
+ * Récupère toutes les tâches liés à une liste
+ * Requete : GET
+ * ACCES : DEVELOPPEUR
+ * Nécessite d'être connecté : OUI
+ */
+taskRouter.get("/list/:id", authUserMiddleWare, async function (req, res) {
+    //vérification droits d'accès
+    if (await isDevConnected(req)) {
+        const connection = await DatabaseUtils.getConnection();
+        const taskService = new TaskServiceImpl(connection);
+
+        const id = req.params.id
+        const limit = req.query.limit ? Number.parseInt(req.query.limit as string) : undefined;
+        const offset = req.query.offset ? Number.parseInt(req.query.offset as string) : undefined;
+
+
+
+        if (id === undefined)
+            return res.status(400).end("Veuillez renseigner les informations nécessaires");
+
+        const task = await taskService.getAllTasksFromList(Number.parseInt(id),{limit,offset});
+        if (task instanceof LogError)
+            LogError.HandleStatus(res, task);
+        else
+            res.json(task);
+    }
+    res.status(403).end();
+});
+
+
+
 export {
     taskRouter
 }

@@ -20,4 +20,7 @@ export interface TaskService {
     getMaxPositionInListById(boardId: number): Promise<number | LogError>;
 
     reorderPositionsInListAfterDeleted(listId: number, positionDeleted: number): Promise<boolean>;
+
+    getAllTasksFromList(listId: number,options?: TaskGetAllOptions,): Promise<TaskModel[] | LogError>;
+
 }
