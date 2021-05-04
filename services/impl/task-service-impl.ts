@@ -174,4 +174,13 @@ export class TaskServiceImpl implements TaskService {
         return true;
     }
 
+    /**
+     * Récupère toutes les tâches liés à une liste
+     * @param listId
+     * @param options
+     */
+    async getAllTasksFromList(listId: number,options?: TaskGetAllOptions): Promise<TaskModel[] | LogError> {
+        return this.taskController.getAllTasksFromList(listId,options);
+    }
+
 }
