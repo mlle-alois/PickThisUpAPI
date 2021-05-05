@@ -22,6 +22,14 @@ export class StatusServiceImpl implements StatusService {
     }
 
     /**
+     * Récupération d'un status depuis son :
+     * @param statusName
+     */
+    getStatusByName(statusName: string): Promise<StatusModel | LogError> {
+        return this.statusController.getStatusByName(statusName);
+    }
+
+    /**
      * Récupération de tous les status possibles des tickets
      * @param options
      */

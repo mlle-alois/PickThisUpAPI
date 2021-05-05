@@ -86,23 +86,23 @@ ticketRouter.get("/", authUserMiddleWare, async function (req, res) {
 
 /**
  * récupération de tickets selon leur statut
- * URL : /ticket/getByStatus/:id
+ * URL : /ticket/getByStatus/:status
  * Requete : GET
  * ACCES : DEVELOPPEUR
  * Nécessite d'être connecté : OUI
  */
-ticketRouter.get("/getByStatus/:id", authUserMiddleWare, async function (req, res) {
+ticketRouter.get("/getByStatus/:status", authUserMiddleWare, async function (req, res) {
     //vérification droits d'accès
     if (await isDevConnected(req)) {
         const connection = await DatabaseUtils.getConnection();
         const ticketService = new TicketServiceImpl(connection);
 
-        const id = req.params.id;
+        const status = req.params.status;
 
-        if (id === undefined)
+        if (status === undefined)
             return res.status(400).end("Veuillez renseigner les informations nécessaires");
 
-        const tickets = await ticketService.getTicketsByStatusId(Number.parseInt(id));
+        const tickets = await ticketService.getTicketsByStatus(status);
 
         res.json(tickets);
     }
