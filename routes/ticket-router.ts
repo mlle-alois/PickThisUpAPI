@@ -75,11 +75,36 @@ ticketRouter.get("/", authUserMiddleWare, async function (req, res) {
         const limit = req.query.limit ? Number.parseInt(req.query.limit as string) : undefined;
         const offset = req.query.offset ? Number.parseInt(req.query.offset as string) : undefined;
 
-        const ticketTicket = await ticketService.getAllTickets({
+        const tickets = await ticketService.getAllTickets({
             limit,
             offset
         });
-        res.json(ticketTicket);
+        res.json(tickets);
+    }
+    res.status(403).end();
+});
+
+/**
+ * récupération de tickets selon leur statut
+ * URL : /ticket/getByStatus/:id
+ * Requete : GET
+ * ACCES : DEVELOPPEUR
+ * Nécessite d'être connecté : OUI
+ */
+ticketRouter.get("/getByStatus/:id", authUserMiddleWare, async function (req, res) {
+    //vérification droits d'accès
+    if (await isDevConnected(req)) {
+        const connection = await DatabaseUtils.getConnection();
+        const ticketService = new TicketServiceImpl(connection);
+
+        const id = req.params.id;
+
+        if (id === undefined)
+            return res.status(400).end("Veuillez renseigner les informations nécessaires");
+
+        const tickets = await ticketService.getTicketsByStatusId(Number.parseInt(id));
+
+        res.json(tickets);
     }
     res.status(403).end();
 });

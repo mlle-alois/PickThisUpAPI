@@ -56,6 +56,37 @@ export class TicketController {
         return [];
     }
 
+    async getTicketsByStatusId(id: number): Promise<TicketModel[]> {
+        const res = await this.connection.query(`SELECT ticket_id,
+                                                        ticket_name,
+                                                        ticket_description,
+                                                        ticket_creation_date,
+                                                        ticket_closing_date,
+                                                        status_id,
+                                                        priority_id,
+                                                        creator_id
+                                                 FROM TICKET 
+                                                 WHERE status_id = ?`, [
+            id
+        ]);
+        const data = res[0];
+        if (Array.isArray(data)) {
+            return (data as RowDataPacket[]).map(function (row: any) {
+                return new TicketModel({
+                    ticketId: row["ticket_id"],
+                    ticketName: row["ticket_name"],
+                    ticketDescription: row["ticket_description"],
+                    ticketCreationDate: row["ticket_creation_date"],
+                    ticketClosingDate: row["ticket_deadline"],
+                    statusId: row["status_id"],
+                    priorityId: row["priority_id"],
+                    creatorId: row["creator_id"]
+                });
+            });
+        }
+        return [];
+    }
+
     async getTicketById(ticketId: number): Promise<TicketModel | LogError> {
         const res = await this.connection.query(`SELECT ticket_id,
                                                         ticket_name,

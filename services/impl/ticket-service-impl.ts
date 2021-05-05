@@ -31,6 +31,18 @@ export class TicketServiceImpl implements TicketService {
     }
 
     /**
+     * Récupération de tous les tickets selon un statut
+     * @param id
+     */
+    async getTicketsByStatusId(id: number): Promise<TicketModel[]> {
+        const status = await this.statusService.getStatusById(id);
+        if(status instanceof LogError)
+            return [];
+
+        return this.ticketController.getTicketsByStatusId(id);
+    }
+
+    /**
      * Récupération de l'id du ticket maximum existant
      */
     async getMaxTicketId(): Promise<number> {

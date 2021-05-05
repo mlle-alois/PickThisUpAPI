@@ -5,6 +5,8 @@ export interface TicketService {
 
     getAllTickets(options?: TicketGetAllOptions): Promise<TicketModel[]>;
 
+    getTicketsByStatusId(id: number): Promise<TicketModel[]>;
+
     getMaxTicketId(): Promise<number>;
 
     getTicketById(ticketId: number): Promise<TicketModel | LogError>;
