@@ -93,7 +93,6 @@ ticketRouter.get("/", authUserMiddleWare, async function (req, res) {
  */
 ticketRouter.get("/getByStatus", authUserMiddleWare, async function (req, res) {
     //vérification droits d'accès
-    console.log('oui')
     if (await isDevConnected(req)) {
         const connection = await DatabaseUtils.getConnection();
         const ticketService = new TicketServiceImpl(connection);
@@ -133,6 +132,31 @@ ticketRouter.get("/get/:id", authUserMiddleWare, async function (req, res) {
             LogError.HandleStatus(res, ticket);
         else
             res.json(ticket);
+    }
+    res.status(403).end();
+});
+
+/**
+ * récupération des membres d'un ticket
+ * URL : /ticket/getMembers/:id
+ * Requete : GET
+ * ACCES : DEVELOPPEUR
+ * Nécessite d'être connecté : OUI
+ */
+ticketRouter.get("/getMembers/:id", authUserMiddleWare, async function (req, res) {
+    //vérification droits d'accès
+    if (await isDevConnected(req)) {
+        const connection = await DatabaseUtils.getConnection();
+        const ticketService = new TicketServiceImpl(connection);
+
+        const id = req.params.id;
+
+        if (id === undefined)
+            return res.status(400).end("Veuillez renseigner les informations nécessaires");
+
+        const members = await ticketService.getMembersByTicketId(Number.parseInt(id));
+
+        res.json(members);
     }
     res.status(403).end();
 });

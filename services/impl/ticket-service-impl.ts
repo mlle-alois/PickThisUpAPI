@@ -1,5 +1,5 @@
 import {TicketController, TicketGetAllOptions, TicketUpdateOptions} from "../../controllers";
-import {LogError, TicketModel} from "../../models";
+import {LogError, TicketModel, UserModel} from "../../models";
 import {Connection} from "mysql2/promise";
 import {TicketService} from "../ticket-service";
 import {UserServiceImpl} from "./user-service-impl";
@@ -77,6 +77,18 @@ export class TicketServiceImpl implements TicketService {
             return new LogError({numError: 404, text: "Creator not exists"});
 
         return this.ticketController.createTicket(options);
+    }
+
+    /**
+     * récupération des membres d'un ticket
+     * @param ticketId
+     */
+    async getMembersByTicketId(ticketId: number): Promise<UserModel[]> {
+        const ticket = await this.ticketController.getTicketById(ticketId);
+        if (ticket instanceof LogError)
+            return [];
+
+        return await this.ticketController.getMembersByTicketId(ticketId);
     }
 
     /**

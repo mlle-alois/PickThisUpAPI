@@ -1,4 +1,4 @@
-import {LogError, TicketModel} from "../models";
+import {LogError, TicketModel, UserModel} from "../models";
 import {TicketGetAllOptions, TicketUpdateOptions} from "../controllers";
 
 export interface TicketService {
@@ -12,6 +12,8 @@ export interface TicketService {
     getTicketById(ticketId: number): Promise<TicketModel | LogError>;
 
     createTicket(options: TicketModel): Promise<TicketModel | LogError>;
+
+    getMembersByTicketId(ticketId: number): Promise<UserModel[]>;
 
     deleteTicketById(ticketId: number): Promise<boolean>;
 

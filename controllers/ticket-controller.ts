@@ -1,4 +1,4 @@
-import {TicketModel, LogError} from "../models";
+import {TicketModel, LogError, UserModel} from "../models";
 import {Connection, ResultSetHeader, RowDataPacket} from "mysql2/promise";
 
 export interface TicketGetAllOptions {
@@ -32,10 +32,12 @@ export class TicketController {
                                                         ticket_description,
                                                         ticket_creation_date,
                                                         ticket_closing_date,
-                                                        status_id,
+                                                        STATUS.status_id,
+                                                        status_libelle,
                                                         priority_id,
                                                         creator_id
-                                                 FROM TICKET LIMIT ?, ?`, [
+                                                 FROM TICKET
+                                                          JOIN STATUS ON TICKET.status_id = STATUS.status_id LIMIT ?, ?`, [
             offset, limit
         ]);
         const data = res[0];
@@ -48,6 +50,7 @@ export class TicketController {
                     ticketCreationDate: row["ticket_creation_date"],
                     ticketClosingDate: row["ticket_deadline"],
                     statusId: row["status_id"],
+                    statusLibelle: row["status_libelle"],
                     priorityId: row["priority_id"],
                     creatorId: row["creator_id"]
                 });
@@ -62,10 +65,12 @@ export class TicketController {
                                                         ticket_description,
                                                         ticket_creation_date,
                                                         ticket_closing_date,
-                                                        status_id,
+                                                        STATUS.status_id,
+                                                        status_libelle,
                                                         priority_id,
                                                         creator_id
-                                                 FROM TICKET 
+                                                 FROM TICKET
+                                                          JOIN STATUS ON TICKET.status_id = STATUS.status_id
                                                  WHERE status_id = ?`, [
             id
         ]);
@@ -79,6 +84,7 @@ export class TicketController {
                     ticketCreationDate: row["ticket_creation_date"],
                     ticketClosingDate: row["ticket_deadline"],
                     statusId: row["status_id"],
+                    statusLibelle: row["status_libelle"],
                     priorityId: row["priority_id"],
                     creatorId: row["creator_id"]
                 });
@@ -93,11 +99,13 @@ export class TicketController {
                                                         ticket_description,
                                                         ticket_creation_date,
                                                         ticket_closing_date,
-                                                        status_id,
+                                                        STATUS.status_id,
+                                                        status_libelle,
                                                         priority_id,
                                                         creator_id
                                                  FROM TICKET
-                                                 where ticket_id = ?`, [
+                                                          JOIN STATUS ON TICKET.status_id = STATUS.status_id
+                                                 where TICKET.ticket_id = ?`, [
             ticketId
         ]);
         const data = res[0];
@@ -112,6 +120,7 @@ export class TicketController {
                     ticketCreationDate: row["ticket_creation_date"],
                     ticketClosingDate: row["ticket_deadline"],
                     statusId: row["status_id"],
+                    statusLibelle: row["status_libelle"],
                     priorityId: row["priority_id"],
                     creatorId: row["creator_id"]
                 });
@@ -257,6 +266,37 @@ export class TicketController {
             });
         }
         return new LogError({numError: 404, text: "No result"});
+    }
+
+    async getMembersByTicketId(ticketId: number): Promise<UserModel[]> {
+        const res = await this.connection.query(`SELECT user_mail,
+                                                        user_password,
+                                                        user_name,
+                                                        user_firstname,
+                                                        user_phone_number,
+                                                        profile_picture_id,
+                                                        user_type_id
+                                                 FROM USER
+                                                          JOIN PARTICIPATE_USER_TICKET
+                                                               ON PARTICIPATE_USER_TICKET.user_id = USER.user_mail
+                                                 where ticket_id = ?`, [
+            ticketId
+        ]);
+        const data = res[0];
+        if (Array.isArray(data)) {
+            return (data as RowDataPacket[]).map(function (row: any) {
+                return new UserModel({
+                    mail: row["user_mail"],
+                    password: row["user_password"],
+                    firstname: row["user_firstname"],
+                    name: row["user_name"],
+                    phoneNumber: row["user_phone_number"],
+                    profilePictureId: row["profile_picture_id"],
+                    typeId: row["user_type_id"]
+                });
+            });
+        }
+        return [];
     }
 
     async openTicket(id: number): Promise<TicketModel | LogError> {

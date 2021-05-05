@@ -7,6 +7,7 @@ export interface ITicketProps {
     creatorId: string;
     priorityId: number;
     statusId: number;
+    statusLibelle?: string;
 }
 
 export class TicketModel implements ITicketProps {
@@ -19,6 +20,7 @@ export class TicketModel implements ITicketProps {
     ticketDescription: string;
     ticketId: number;
     ticketName: string;
+    statusLibelle?: string;
 
     constructor(properties: ITicketProps) {
         this.ticketId = properties.ticketId;
@@ -29,5 +31,6 @@ export class TicketModel implements ITicketProps {
         this.statusId = properties.statusId;
         this.priorityId = properties.priorityId;
         this.creatorId = properties.creatorId;
+        this.statusLibelle = properties.statusLibelle;
     }
 }
