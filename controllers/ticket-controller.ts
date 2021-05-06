@@ -10,7 +10,6 @@ export interface TicketUpdateOptions {
     ticketId: number;
     ticketName: string;
     ticketDescription: string;
-    ticketClosingDate: Date;
     statusId: number;
     priorityId: number;
 }
@@ -71,7 +70,7 @@ export class TicketController {
                                                         creator_id
                                                  FROM TICKET
                                                           JOIN STATUS ON TICKET.status_id = STATUS.status_id
-                                                 WHERE status_id = ?`, [
+                                                 WHERE TICKET.status_id = ?`, [
             id
         ]);
         const data = res[0];
@@ -201,10 +200,6 @@ export class TicketController {
             setClause.push("ticket_description = ?");
             params.push(options.ticketDescription);
         }
-        if (options.ticketClosingDate !== undefined) {
-            setClause.push("ticket_closing_date = ?");
-            params.push(options.ticketClosingDate);
-        }
         if (options.statusId !== undefined) {
             setClause.push("status_id = ?");
             params.push(options.statusId);
@@ -302,7 +297,8 @@ export class TicketController {
     async openTicket(id: number): Promise<TicketModel | LogError> {
         try {
             const res = await this.connection.execute(`UPDATE TICKET
-                                                       SET status_id = 1
+                                                       SET status_id = 1,
+                                                           ticket_closing_date = null
                                                        WHERE ticket_id = ?`, [
                 id
             ]);
@@ -320,7 +316,8 @@ export class TicketController {
     async closeTicket(id: number): Promise<TicketModel | LogError> {
         try {
             const res = await this.connection.execute(`UPDATE TICKET
-                                                       SET status_id = 2
+                                                       SET status_id = 2,
+                                                           ticket_closing_date = NOW()
                                                        WHERE ticket_id = ?`, [
                 id
             ]);
@@ -338,7 +335,8 @@ export class TicketController {
     async archiveTicket(id: number): Promise<TicketModel | LogError> {
         try {
             const res = await this.connection.execute(`UPDATE TICKET
-                                                       SET status_id = 3
+                                                       SET status_id = 3,
+                                                           ticket_closing_date = NOW()
                                                        WHERE ticket_id = ?`, [
                 id
             ]);

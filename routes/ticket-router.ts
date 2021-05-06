@@ -25,8 +25,8 @@ ticketRouter.post("/add", authUserMiddleWare, async function (req, res) {
         const name = req.body.name;
         const description = req.body.description ? req.body.description : null;
         const closingDate = req.body.closingDate ? req.body.closingDate : null;
-        const statusId = req.body.statusId;
-        const priorityId = req.body.priorityId;
+        const statusId = req.body.statusId ? req.body.statusId : 1;
+        const priorityId = req.body.priorityId ? req.body.priorityId : 1;
 
         if (name === undefined || description === undefined ||
             closingDate === undefined || statusId === undefined || priorityId === undefined)
@@ -174,12 +174,11 @@ ticketRouter.put("/update/:id", authUserMiddleWare, async function (req, res) {
         const id = req.params.id;
         const name = req.body.name;
         const description = req.body.description;
-        const closingDate = req.body.closingDate;
         const statusId = req.body.statusId;
         const priorityId = req.body.priorityId;
 
-        if (id === undefined || (name === undefined && description === undefined &&
-            closingDate === undefined && statusId === undefined && priorityId === undefined)) {
+        if (id === undefined || (name === undefined && description === undefined
+            && statusId === undefined && priorityId === undefined)) {
             res.status(400).end("Veuillez renseigner les informations nécessaires");
             return;
         }
@@ -190,7 +189,6 @@ ticketRouter.put("/update/:id", authUserMiddleWare, async function (req, res) {
             ticketId: Number.parseInt(id),
             ticketName: name,
             ticketDescription: description,
-            ticketClosingDate: closingDate,
             statusId,
             priorityId
         });
