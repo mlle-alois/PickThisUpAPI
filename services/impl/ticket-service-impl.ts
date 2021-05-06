@@ -113,11 +113,6 @@ export class TicketServiceImpl implements TicketService {
         if (ticket instanceof LogError)
             return new LogError({numError: 404, text: "Ticket not exists"});
 
-        if(options.statusId !== undefined) {
-            const status = await this.statusService.getStatusById(options.statusId as number);
-            if (status instanceof LogError)
-                return new LogError({numError: 404, text: "Status not exists"});
-        }
         if(options.priorityId !== undefined) {
             const priority = await this.priorityService.getPriorityById(options.priorityId as number);
             if (priority instanceof LogError)
