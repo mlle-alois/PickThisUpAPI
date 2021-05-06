@@ -10,7 +10,6 @@ export interface TicketUpdateOptions {
     ticketId: number;
     ticketName: string;
     ticketDescription: string;
-    statusId: number;
     priorityId: number;
 }
 
@@ -199,10 +198,6 @@ export class TicketController {
         if (options.ticketDescription !== undefined) {
             setClause.push("ticket_description = ?");
             params.push(options.ticketDescription);
-        }
-        if (options.statusId !== undefined) {
-            setClause.push("status_id = ?");
-            params.push(options.statusId);
         }
         if (options.priorityId !== undefined) {
             setClause.push("priority_id = ?");
