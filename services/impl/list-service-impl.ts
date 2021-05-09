@@ -135,8 +135,14 @@ export class ListServiceImpl implements ListService {
         if (board instanceof LogError)
             return false;
 
-        if (positionDeleted !== 0) {
-            return await this.listController.reorderPositionsInBoardAfterDeleted(boardId, positionDeleted);
+        const boardLists =  await this.getListByBoardId(board.boardId);
+        if(boardLists instanceof LogError)
+            return false;
+
+        if(boardLists.length > 0 && (boardLists.length === 1 && boardLists[0].positionInBoard !== 1)) {
+            if (positionDeleted !== 0) {
+                return await this.listController.reorderPositionsInBoardAfterDeleted(boardId, positionDeleted);
+            }
         }
         return true;
     }
