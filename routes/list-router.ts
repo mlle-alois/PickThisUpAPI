@@ -119,7 +119,7 @@ listRouter.get("/board/:id", authUserMiddleWare, async function (req, res) {
         if (id === undefined)
             return res.status(400).end("Veuillez renseigner les informations nécessaires");
 
-        const list = await listService.getListByBoardId(Number.parseInt(id));
+        const list = await listService.getListsByBoardId(Number.parseInt(id));
         if (list instanceof LogError)
             LogError.HandleStatus(res, list);
         else

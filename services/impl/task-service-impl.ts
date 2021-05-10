@@ -168,8 +168,13 @@ export class TaskServiceImpl implements TaskService {
         if (list instanceof LogError)
             return false;
 
-        if (positionDeleted !== 0) {
-            return await this.taskController.reorderPositionsInListAfterDeleted(listId, positionDeleted);
+        const listTasks =  await this.getAllTasksFromList(list.listId);
+        if(listTasks instanceof LogError)
+            return false;
+        if(listTasks.length > 0 && (listTasks.length === 1 && listTasks[0].positionInList !== 1)) {
+            if (positionDeleted !== 0) {
+                return await this.taskController.reorderPositionsInListAfterDeleted(listId, positionDeleted);
+            }
         }
         return true;
     }

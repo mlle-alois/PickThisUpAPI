@@ -135,7 +135,7 @@ export class ListServiceImpl implements ListService {
         if (board instanceof LogError)
             return false;
 
-        const boardLists =  await this.getListByBoardId(board.boardId);
+        const boardLists =  await this.getListsByBoardId(board.boardId);
         if(boardLists instanceof LogError)
             return false;
 
@@ -151,7 +151,7 @@ export class ListServiceImpl implements ListService {
      * Récupère toutes les listes liés aux boards id
      * @param boardId
      */
-   async getListByBoardId(boardId: number): Promise<ListModel[] | LogError>{
+   async getListsByBoardId(boardId: number): Promise<ListModel[] | LogError>{
         return this.listController.getListByBoardId(boardId);
    }
 }

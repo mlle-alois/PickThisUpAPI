@@ -21,5 +21,5 @@ export interface ListService {
 
     reorderPositionsInBoardAfterDeleted(boardId: number, positionDeleted: number): Promise<boolean>;
 
-    getListByBoardId(boardId: number): Promise<ListModel[] | LogError>;
+    getListsByBoardId(boardId: number): Promise<ListModel[] | LogError>;
 }
