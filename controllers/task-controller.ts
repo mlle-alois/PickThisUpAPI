@@ -397,7 +397,7 @@ export class TaskController {
 
     async assignUserToTask(taskId: number, userMail: string): Promise<TaskModel | LogError> {
         try {
-            await this.connection.execute(`INSERT INTO PARTICIPATE_USER_TASK (user_id, task_id)
+            await this.connection.execute(`INSERT IGNORE INTO PARTICIPATE_USER_TASK (user_id, task_id)
                                            VALUES (?, ?)`, [
                 userMail, taskId
             ]);
@@ -406,6 +406,22 @@ export class TaskController {
         } catch (err) {
             console.error(err);
             return new LogError({numError: 500, text: "Error during assignation"});
+        }
+    }
+
+    async unassignUserToTask(taskId: number, userMail: string): Promise<boolean> {
+        try {
+            const res = await this.connection.query(`DELETE
+                                                     FROM PARTICIPATE_USER_TASK
+                                                     WHERE task_id = ?
+                                                     AND user_id = ?`, [
+                taskId, userMail
+            ]);
+            const headers = res[0] as ResultSetHeader;
+            return headers.affectedRows > 0;
+        } catch (err) {
+            console.error(err);
+            return false;
         }
     }
 

@@ -242,12 +242,12 @@ taskRouter.put("/update-position/:id", authUserMiddleWare, async function (req, 
 
 /**
  * suppression d'une tache selon son id
- * URL : /task/:id
+ * URL : /task/delete/:id
  * Requete : DELETE
  * ACCES : DEVELOPPEUR
  * Nécessite d'être connecté : OUI
  */
-taskRouter.delete("/:id", authUserMiddleWare, async function (req, res) {
+taskRouter.delete("/delete/:id", authUserMiddleWare, async function (req, res) {
     //vérification droits d'accès
     if (await isDevConnected(req)) {
         const connection = await DatabaseUtils.getConnection();
@@ -298,7 +298,7 @@ taskRouter.get("/list/:id", authUserMiddleWare, async function (req, res) {
 
 /**
  * assignation d'un développeur à une tâche
- * URL : /task/assign?taskId={x}&userMail={x}
+ * URL : /task/assign
  * Requete : POST
  * ACCES : DEVELOPPEUR
  * Nécessite d'être connecté : OUI
@@ -309,8 +309,8 @@ taskRouter.post("/assign", authUserMiddleWare, async function (req, res) {
         const connection = await DatabaseUtils.getConnection();
         const taskService = new TaskServiceImpl(connection);
 
-        const taskId = req.query.taskId as string;
-        const userMail = req.query.userMail as string;
+        const taskId = req.body.taskId as string;
+        const userMail = req.body.userMail as string;
 
         if (taskId === undefined || userMail === undefined)
             return res.status(400).end("Veuillez renseigner les informations nécessaires");
@@ -323,6 +323,34 @@ taskRouter.post("/assign", authUserMiddleWare, async function (req, res) {
             res.status(201);
             res.json(assignation);
         }
+    }
+    res.status(403).end();
+});
+
+/**
+ * désassignation d'un développeur à une tâche
+ * URL : /task/unassign?taskId={x}&userMail={x}
+ * Requete : DELETE
+ * ACCES : DEVELOPPEUR
+ * Nécessite d'être connecté : OUI
+ */
+taskRouter.delete("/unassign", authUserMiddleWare, async function (req, res) {
+    //vérification droits d'accès
+    if (await isDevConnected(req)) {
+        const connection = await DatabaseUtils.getConnection();
+        const taskService = new TaskServiceImpl(connection);
+
+        const taskId = req.query.taskId as string;
+        const userMail = req.query.userMail as string;
+
+        if (taskId === undefined || userMail === undefined)
+            return res.status(400).end("Veuillez renseigner les informations nécessaires");
+
+        const success = await taskService.unassignUserToTask(Number.parseInt(taskId), userMail);
+        if (success)
+            res.status(204).end();
+        else
+            res.status(404).end();
     }
     res.status(403).end();
 });

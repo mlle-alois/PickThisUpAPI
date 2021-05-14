@@ -29,4 +29,6 @@ export interface TaskService {
 
     assignUserToTask(taskId: number, userMail: string): Promise<TaskModel | LogError>;
 
+    unassignUserToTask(taskId: number, userMail: string): Promise<boolean>;
+
 }

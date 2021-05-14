@@ -209,7 +209,7 @@ export class TaskServiceImpl implements TaskService {
     }
 
     /**
-     * Récupère toutes les tâches liés à une liste
+     * Assigne un développeur à une tâche
      * @param taskId
      * @param userMail
      */
@@ -223,5 +223,22 @@ export class TaskServiceImpl implements TaskService {
             return new LogError({numError: 404, text: "User not exists"});
 
         return this.taskController.assignUserToTask(taskId, userMail);
+    }
+
+    /**
+     * Désassigne un développeur à une tâche
+     * @param taskId
+     * @param userMail
+     */
+    async unassignUserToTask(taskId: number, userMail: string): Promise<boolean> {
+        const task = await this.taskController.getTaskById(taskId);
+        if (task instanceof LogError)
+            return false;
+
+        const user = await this.userService.getUserByMail(userMail);
+        if (user instanceof LogError)
+            return false;
+
+        return this.taskController.unassignUserToTask(taskId, userMail);
     }
 }
