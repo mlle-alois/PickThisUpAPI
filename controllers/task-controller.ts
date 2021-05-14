@@ -395,4 +395,18 @@ export class TaskController {
         return [];
     }
 
+    async assignUserToTask(taskId: number, userMail: string): Promise<TaskModel | LogError> {
+        try {
+            await this.connection.execute(`INSERT INTO PARTICIPATE_USER_TASK (user_id, task_id)
+                                           VALUES (?, ?)`, [
+                userMail, taskId
+            ]);
+
+            return await this.getTaskById(taskId);
+        } catch (err) {
+            console.error(err);
+            return new LogError({numError: 500, text: "Error during assignation"});
+        }
+    }
+
 }

@@ -58,7 +58,7 @@ export class TaskServiceImpl implements TaskService {
             if (status instanceof LogError)
                 return new LogError({numError: 404, text: "Status not exists"});
         }*/
-        if(options.priorityId !== null) {
+        if (options.priorityId !== null) {
             const priority = await this.priorityService.getPriorityById(options.priorityId as number);
             if (priority instanceof LogError)
                 return new LogError({numError: 404, text: "Priority not exists"});
@@ -119,12 +119,12 @@ export class TaskServiceImpl implements TaskService {
         if (task instanceof LogError)
             return new LogError({numError: 404, text: "Task not exists"});
 
-        if(options.statusId !== undefined) {
+        if (options.statusId !== undefined) {
             const status = await this.statusService.getStatusById(options.statusId as number);
             if (status instanceof LogError)
                 return new LogError({numError: 404, text: "Status not exists"});
         }
-        if(options.priorityId !== undefined) {
+        if (options.priorityId !== undefined) {
             const priority = await this.priorityService.getPriorityById(options.priorityId as number);
             if (priority instanceof LogError)
                 return new LogError({numError: 404, text: "Priority not exists"});
@@ -188,10 +188,10 @@ export class TaskServiceImpl implements TaskService {
         if (list instanceof LogError)
             return false;
 
-        const listTasks =  await this.getAllTasksFromList(list.listId);
-        if(listTasks instanceof LogError)
+        const listTasks = await this.getAllTasksFromList(list.listId);
+        if (listTasks instanceof LogError)
             return false;
-        if(listTasks.length > 0 && (listTasks.length === 1 && listTasks[0].positionInList !== 1)) {
+        if (listTasks.length > 0 && (listTasks.length === 1 && listTasks[0].positionInList !== 1)) {
             if (positionDeleted !== 0) {
                 return await this.taskController.reorderPositionsInListAfterDeleted(listId, positionDeleted);
             }
@@ -204,8 +204,24 @@ export class TaskServiceImpl implements TaskService {
      * @param listId
      * @param options
      */
-    async getAllTasksFromList(listId: number,options?: TaskGetAllOptions): Promise<TaskModel[] | LogError> {
-        return this.taskController.getAllTasksFromList(listId,options);
+    async getAllTasksFromList(listId: number, options?: TaskGetAllOptions): Promise<TaskModel[] | LogError> {
+        return this.taskController.getAllTasksFromList(listId, options);
     }
 
+    /**
+     * Récupère toutes les tâches liés à une liste
+     * @param taskId
+     * @param userMail
+     */
+    async assignUserToTask(taskId: number, userMail: string): Promise<TaskModel | LogError> {
+        const task = await this.taskController.getTaskById(taskId);
+        if (task instanceof LogError)
+            return new LogError({numError: 409, text: "Task not exists"});
+
+        const user = await this.userService.getUserByMail(userMail);
+        if (user instanceof LogError)
+            return new LogError({numError: 404, text: "User not exists"});
+
+        return this.taskController.assignUserToTask(taskId, userMail);
+    }
 }

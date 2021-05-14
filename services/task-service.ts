@@ -27,4 +27,6 @@ export interface TaskService {
 
     getAllTasksFromList(listId: number, options?: TaskGetAllOptions,): Promise<TaskModel[] | LogError>;
 
+    assignUserToTask(taskId: number, userMail: string): Promise<TaskModel | LogError>;
+
 }

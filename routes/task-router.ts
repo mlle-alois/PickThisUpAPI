@@ -284,8 +284,6 @@ taskRouter.get("/list/:id", authUserMiddleWare, async function (req, res) {
         const limit = req.query.limit ? Number.parseInt(req.query.limit as string) : undefined;
         const offset = req.query.offset ? Number.parseInt(req.query.offset as string) : undefined;
 
-
-
         if (id === undefined)
             return res.status(400).end("Veuillez renseigner les informations nécessaires");
 
@@ -294,6 +292,37 @@ taskRouter.get("/list/:id", authUserMiddleWare, async function (req, res) {
             LogError.HandleStatus(res, task);
         else
             res.json(task);
+    }
+    res.status(403).end();
+});
+
+/**
+ * assignation d'un développeur à une tâche
+ * URL : /task/assign?taskId={x}&userMail={x}
+ * Requete : POST
+ * ACCES : DEVELOPPEUR
+ * Nécessite d'être connecté : OUI
+ */
+taskRouter.post("/assign", authUserMiddleWare, async function (req, res) {
+    //vérification droits d'accès
+    if (await isDevConnected(req)) {
+        const connection = await DatabaseUtils.getConnection();
+        const taskService = new TaskServiceImpl(connection);
+
+        const taskId = req.query.taskId as string;
+        const userMail = req.query.userMail as string;
+
+        if (taskId === undefined || userMail === undefined)
+            return res.status(400).end("Veuillez renseigner les informations nécessaires");
+
+        const assignation = await taskService.assignUserToTask(Number.parseInt(taskId), userMail)
+
+        if (assignation instanceof LogError) {
+            LogError.HandleStatus(res, assignation);
+        } else {
+            res.status(201);
+            res.json(assignation);
+        }
     }
     res.status(403).end();
 });
