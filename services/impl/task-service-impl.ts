@@ -1,5 +1,5 @@
 import {TaskController, TaskGetAllOptions, TaskUpdateOptions} from "../../controllers";
-import {LogError, TaskModel} from "../../models";
+import {LogError, TaskModel, UserModel} from "../../models";
 import {Connection} from "mysql2/promise";
 import {TaskService} from "../task-service";
 import {ListServiceImpl} from "./list-service-impl";
@@ -53,11 +53,11 @@ export class TaskServiceImpl implements TaskService {
      * @param options
      */
     async createTask(options: TaskModel): Promise<TaskModel | LogError> {
-        if(options.statusId !== null) {
+        /*if(options.statusId !== null) {
             const status = await this.statusService.getStatusById(options.statusId as number);
             if (status instanceof LogError)
                 return new LogError({numError: 404, text: "Status not exists"});
-        }
+        }*/
         if(options.priorityId !== null) {
             const priority = await this.priorityService.getPriorityById(options.priorityId as number);
             if (priority instanceof LogError)
@@ -72,6 +72,26 @@ export class TaskServiceImpl implements TaskService {
             return new LogError({numError: 404, text: "Creator not exists"});
 
         return this.taskController.createTask(options);
+    }
+
+    /**
+     * récupération des membres d'une tâche
+     * @param taskId
+     */
+    async getMembersByTaskId(taskId: number): Promise<UserModel[]> {
+        const task = await this.taskController.getTaskById(taskId);
+        if (task instanceof LogError)
+            return [];
+
+        return await this.taskController.getMembersByTaskId(taskId);
+    }
+
+    /**
+     * récupération des développeurs assignables à une tâche
+     * @param options
+     */
+    async getAllDevelopers(options?: TaskGetAllOptions): Promise<UserModel[]> {
+        return await this.taskController.getAllDevelopers(options);
     }
 
     /**

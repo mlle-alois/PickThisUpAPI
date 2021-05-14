@@ -24,12 +24,11 @@ taskRouter.post("/add", authUserMiddleWare, async function (req, res) {
         const name = req.body.name;
         const description = req.body.description ? req.body.description : null;
         const deadline = req.body.deadline ? req.body.deadline : null;
-        const statusId = req.body.statusId ? req.body.statusId : null;
         const priorityId = req.body.priorityId ? req.body.priorityId : null;
         const listId = req.body.listId;
 
         if (name === undefined || description === undefined || listId === undefined ||
-            deadline === undefined || statusId === undefined || priorityId === undefined)
+            deadline === undefined || priorityId === undefined)
             return res.status(400).end("Veuillez renseigner les informations nécessaires");
 
         const positionInList = await taskService.getMaxPositionInListById(listId);
@@ -49,7 +48,6 @@ taskRouter.post("/add", authUserMiddleWare, async function (req, res) {
             taskCreationDate: creationDate,
             taskDeadline: deadline,
             positionInList: positionInList + 1,
-            statusId,
             priorityId,
             listId,
             creatorId
@@ -81,23 +79,23 @@ taskRouter.get("/", authUserMiddleWare, async function (req, res) {
         const limit = req.query.limit ? Number.parseInt(req.query.limit as string) : undefined;
         const offset = req.query.offset ? Number.parseInt(req.query.offset as string) : undefined;
 
-        const taskTask = await taskService.getAllTasks({
+        const tasks = await taskService.getAllTasks({
             limit,
             offset
         });
-        res.json(taskTask);
+        res.json(tasks);
     }
     res.status(403).end();
 });
 
 /**
  * récupération d'une tache selon son id
- * URL : /task/:id
+ * URL : /task/get/:id
  * Requete : GET
  * ACCES : DEVELOPPEUR
  * Nécessite d'être connecté : OUI
  */
-taskRouter.get("/:id", authUserMiddleWare, async function (req, res) {
+taskRouter.get("/get/:id", authUserMiddleWare, async function (req, res) {
     //vérification droits d'accès
     if (await isDevConnected(req)) {
         const connection = await DatabaseUtils.getConnection();
@@ -113,6 +111,56 @@ taskRouter.get("/:id", authUserMiddleWare, async function (req, res) {
             LogError.HandleStatus(res, task);
         else
             res.json(task);
+    }
+    res.status(403).end();
+});
+
+/**
+ * récupération des membres d'une tâche
+ * URL : /task/getMembers/:id
+ * Requete : GET
+ * ACCES : DEVELOPPEUR
+ * Nécessite d'être connecté : OUI
+ */
+taskRouter.get("/getMembers/:id", authUserMiddleWare, async function (req, res) {
+    //vérification droits d'accès
+    if (await isDevConnected(req)) {
+        const connection = await DatabaseUtils.getConnection();
+        const taskService = new TaskServiceImpl(connection);
+
+        const id = req.params.id;
+
+        if (id === undefined)
+            return res.status(400).end("Veuillez renseigner les informations nécessaires");
+
+        const members = await taskService.getMembersByTaskId(Number.parseInt(id));
+
+        res.json(members);
+    }
+    res.status(403).end();
+});
+
+/**
+ * récupération des développeurs assignables à une tâche
+ * URL : /task/getAllDevelopers?[limit={x}&offset={x}]
+ * Requete : GET
+ * ACCES : DEVELOPPEUR
+ * Nécessite d'être connecté : OUI
+ */
+taskRouter.get("/getAllDevelopers", authUserMiddleWare, async function (req, res) {
+    //vérification droits d'accès
+    if (await isDevConnected(req)) {
+        const connection = await DatabaseUtils.getConnection();
+        const taskService = new TaskServiceImpl(connection);
+
+        const limit = req.query.limit ? Number.parseInt(req.query.limit as string) : undefined;
+        const offset = req.query.offset ? Number.parseInt(req.query.offset as string) : undefined;
+
+        const developers = await taskService.getAllDevelopers({
+            limit,
+            offset
+        });
+        res.json(developers);
     }
     res.status(403).end();
 });
@@ -220,7 +268,7 @@ taskRouter.delete("/:id", authUserMiddleWare, async function (req, res) {
 });
 
 /**
- * URL : /task/:id?limit={x}&offset={x}
+ * URL : /task/list/:id?limit={x}&offset={x}
  * Récupère toutes les tâches liés à une liste
  * Requete : GET
  * ACCES : DEVELOPPEUR
@@ -249,8 +297,6 @@ taskRouter.get("/list/:id", authUserMiddleWare, async function (req, res) {
     }
     res.status(403).end();
 });
-
-
 
 export {
     taskRouter

@@ -1,4 +1,4 @@
-import {TaskModel, LogError} from "../models";
+import {TaskModel, LogError, UserModel} from "../models";
 import {Connection, ResultSetHeader, RowDataPacket} from "mysql2/promise";
 
 export interface TaskGetAllOptions {
@@ -128,7 +128,7 @@ export class TaskController {
                 options.taskCreationDate,
                 options.taskDeadline,
                 options.positionInList,
-                options.statusId,
+                1, //statut ouvert
                 options.priorityId,
                 options.listId,
                 options.creatorId
@@ -239,12 +239,12 @@ export class TaskController {
         let res = await this.connection.query(`UPDATE TASK
                                                SET position_in_list = position_in_list + 1
                                                WHERE list_id = (SELECT list_id
-                                                                 FROM TASK
-                                                                 WHERE task_id = ?)
+                                                                FROM TASK
+                                                                WHERE task_id = ?)
                                                  AND position_in_list >= ?
                                                  AND position_in_list < (SELECT position_in_list
-                                                                          FROM TASK
-                                                                          WHERE task_id = ?)`, [
+                                                                         FROM TASK
+                                                                         WHERE task_id = ?)`, [
             taskId,
             newPositionInBoard,
             taskId
@@ -267,11 +267,11 @@ export class TaskController {
         let res = await this.connection.query(`UPDATE TASK
                                                SET position_in_list = position_in_list - 1
                                                WHERE list_id = (SELECT list_id
-                                                                 FROM TASK
-                                                                 WHERE task_id = ?)
+                                                                FROM TASK
+                                                                WHERE task_id = ?)
                                                  AND position_in_list > (SELECT position_in_list
-                                                                          FROM TASK
-                                                                          WHERE task_id = ?)
+                                                                         FROM TASK
+                                                                         WHERE task_id = ?)
                                                  AND position_in_list <= ?`, [
             taskId,
             taskId,
@@ -291,7 +291,7 @@ export class TaskController {
         return false;
     }
 
-    async getAllTasksFromList(listId:number, options?: TaskGetAllOptions): Promise<TaskModel[] | LogError> {
+    async getAllTasksFromList(listId: number, options?: TaskGetAllOptions): Promise<TaskModel[] | LogError> {
         const limit = options?.limit || 20;
         const offset = options?.offset || 0;
 
@@ -305,13 +305,14 @@ export class TaskController {
                                                         priority_id,
                                                         list_id,
                                                         creator_id
-                                                 FROM TASK WHERE list_id = ? LIMIT ?, ?`, [
-            listId,offset, limit
+                                                 FROM TASK
+                                                 WHERE list_id = ? LIMIT ?, ?`, [
+            listId, offset, limit
         ]);
         const data = res[0];
         if (Array.isArray(data)) {
             if (data.length === 0)
-                return new LogError({ numError: 404, text: "No tasks found "});
+                return new LogError({numError: 404, text: "No tasks found "});
 
             return (data as RowDataPacket[]).map(function (row: any) {
                 return new TaskModel({
@@ -328,7 +329,70 @@ export class TaskController {
                 });
             });
         }
-        return new LogError({ numError: 404, text: "No tasks found "});
+        return new LogError({numError: 404, text: "No tasks found "});
+    }
+
+    async getMembersByTaskId(ticketId: number): Promise<UserModel[]> {
+        const res = await this.connection.query(`SELECT user_mail,
+                                                        user_password,
+                                                        user_name,
+                                                        user_firstname,
+                                                        user_phone_number,
+                                                        profile_picture_id,
+                                                        user_type_id
+                                                 FROM USER
+                                                          JOIN PARTICIPATE_USER_TASK
+                                                               ON PARTICIPATE_USER_TASK.user_id = USER.user_mail
+                                                 where task_id = ?`, [
+            ticketId
+        ]);
+        const data = res[0];
+        if (Array.isArray(data)) {
+            return (data as RowDataPacket[]).map(function (row: any) {
+                return new UserModel({
+                    mail: row["user_mail"],
+                    password: row["user_password"],
+                    firstname: row["user_firstname"],
+                    name: row["user_name"],
+                    phoneNumber: row["user_phone_number"],
+                    profilePictureId: row["profile_picture_id"],
+                    typeId: row["user_type_id"]
+                });
+            });
+        }
+        return [];
+    }
+
+    async getAllDevelopers(options?: TaskGetAllOptions): Promise<UserModel[]> {
+        const limit = options?.limit || 20;
+        const offset = options?.offset || 0;
+
+        const res = await this.connection.query(`SELECT user_mail,
+                                                        user_password,
+                                                        user_name,
+                                                        user_firstname,
+                                                        user_phone_number,
+                                                        profile_picture_id,
+                                                        user_type_id
+                                                 FROM USER
+                                                 WHERE user_type_id = 1 LIMIT ?, ?`, [
+            offset, limit
+        ]);
+        const data = res[0];
+        if (Array.isArray(data)) {
+            return (data as RowDataPacket[]).map(function (row: any) {
+                return new UserModel({
+                    mail: row["user_mail"],
+                    password: row["user_password"],
+                    firstname: row["user_firstname"],
+                    name: row["user_name"],
+                    phoneNumber: row["user_phone_number"],
+                    profilePictureId: row["profile_picture_id"],
+                    typeId: row["user_type_id"]
+                });
+            });
+        }
+        return [];
     }
 
 }

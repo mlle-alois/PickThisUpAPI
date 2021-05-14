@@ -1,4 +1,4 @@
-import {LogError, TaskModel} from "../models";
+import {LogError, TaskModel, UserModel} from "../models";
 import {TaskGetAllOptions, TaskUpdateOptions} from "../controllers";
 
 export interface TaskService {
@@ -11,6 +11,10 @@ export interface TaskService {
 
     createTask(options: TaskModel): Promise<TaskModel | LogError>;
 
+    getMembersByTaskId(taskId: number): Promise<UserModel[]>;
+
+    getAllDevelopers(options?: TaskGetAllOptions): Promise<UserModel[]>;
+
     deleteTaskById(taskId: number): Promise<boolean>;
 
     updateTask(options: TaskUpdateOptions): Promise<TaskModel | LogError>;
@@ -21,6 +25,6 @@ export interface TaskService {
 
     reorderPositionsInListAfterDeleted(listId: number, positionDeleted: number): Promise<boolean>;
 
-    getAllTasksFromList(listId: number,options?: TaskGetAllOptions,): Promise<TaskModel[] | LogError>;
+    getAllTasksFromList(listId: number, options?: TaskGetAllOptions,): Promise<TaskModel[] | LogError>;
 
 }
