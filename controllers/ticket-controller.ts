@@ -46,7 +46,7 @@ export class TicketController {
                     ticketName: row["ticket_name"],
                     ticketDescription: row["ticket_description"],
                     ticketCreationDate: row["ticket_creation_date"],
-                    ticketClosingDate: row["ticket_deadline"],
+                    ticketClosingDate: row["ticket_closing_date"],
                     statusId: row["status_id"],
                     statusLibelle: row["status_libelle"],
                     priorityId: row["priority_id"],
