@@ -336,7 +336,6 @@ taskRouter.post("/assign", authUserMiddleWare, async function (req, res) {
  */
 taskRouter.delete("/unassign", authUserMiddleWare, async function (req, res) {
     //vérification droits d'accès
-    console.log('oui')
     if (await isDevConnected(req)) {
         const connection = await DatabaseUtils.getConnection();
         const taskService = new TaskServiceImpl(connection);
