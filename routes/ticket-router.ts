@@ -193,6 +193,7 @@ ticketRouter.put("/update/:id", authUserMiddleWare, async function (req, res) {
         if (ticket instanceof LogError)
             LogError.HandleStatus(res, ticket);
         else
+            console.log(ticket)
             res.json(ticket);
     }
     res.status(403).end();
@@ -284,12 +285,12 @@ ticketRouter.put("/archive/:id", authUserMiddleWare, async function (req, res) {
 
 /**
  * suppression d'un ticket selon son id
- * URL : /ticket/:id
+ * URL : /ticket/delete/:id
  * Requete : DELETE
  * ACCES : DEVELOPPEUR
  * Nécessite d'être connecté : OUI
  */
-ticketRouter.delete("/:id", authUserMiddleWare, async function (req, res) {
+ticketRouter.delete("/delete/:id", authUserMiddleWare, async function (req, res) {
     //vérification droits d'accès
     if (await isDevConnected(req)) {
         const connection = await DatabaseUtils.getConnection();
@@ -374,8 +375,8 @@ ticketRouter.post("/assign", authUserMiddleWare, async function (req, res) {
         const connection = await DatabaseUtils.getConnection();
         const ticketService = new TicketServiceImpl(connection);
 
-        const ticketId = req.query.ticketId as string;
-        const userMail = req.query.userMail as string;
+        const ticketId = req.body.ticketId as string;
+        const userMail = req.body.userMail as string;
 
         if (ticketId === undefined || userMail === undefined)
             return res.status(400).end("Veuillez renseigner les informations nécessaires");
