@@ -26,4 +26,8 @@ export interface TicketService {
     closeTicket(id: number): Promise<TicketModel | LogError>;
 
     archiveTicket(id: number): Promise<TicketModel | LogError>;
+
+    assignUserToTicket(ticketId: number, userMail: string): Promise<TicketModel | LogError>;
+
+    unassignUserToTicket(ticketId: number, userMail: string): Promise<boolean>;
 }

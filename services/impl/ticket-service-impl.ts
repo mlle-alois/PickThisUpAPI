@@ -36,7 +36,7 @@ export class TicketServiceImpl implements TicketService {
      */
     async getTicketsByStatus(status: string): Promise<TicketModel[]> {
         const st = await this.statusService.getStatusByName(status);
-        if(st instanceof LogError)
+        if (st instanceof LogError)
             return [];
 
         return this.ticketController.getTicketsByStatusId(st.statusId);
@@ -62,12 +62,12 @@ export class TicketServiceImpl implements TicketService {
      * @param options
      */
     async createTicket(options: TicketModel): Promise<TicketModel | LogError> {
-        if(options.statusId !== null) {
+        if (options.statusId !== null) {
             const status = await this.statusService.getStatusById(options.statusId as number);
             if (status instanceof LogError)
                 return new LogError({numError: 404, text: "Status not exists"});
         }
-        if(options.priorityId !== null) {
+        if (options.priorityId !== null) {
             const priority = await this.priorityService.getPriorityById(options.priorityId as number);
             if (priority instanceof LogError)
                 return new LogError({numError: 404, text: "Priority not exists"});
@@ -113,13 +113,13 @@ export class TicketServiceImpl implements TicketService {
         if (ticket instanceof LogError)
             return new LogError({numError: 404, text: "Ticket not exists"});
 
-        if(options.priorityId !== undefined) {
+        if (options.priorityId !== undefined) {
             const priority = await this.priorityService.getPriorityById(options.priorityId as number);
             if (priority instanceof LogError)
                 return new LogError({numError: 404, text: "Priority not exists"});
         }
 
-        return  await this.ticketController.updateTicket(options);
+        return await this.ticketController.updateTicket(options);
     }
 
     /**
@@ -139,7 +139,7 @@ export class TicketServiceImpl implements TicketService {
         if (ticket instanceof LogError)
             return new LogError({numError: 404, text: "Ticket not exists"});
 
-        return  await this.ticketController.openTicket(id);
+        return await this.ticketController.openTicket(id);
     }
 
     /**
@@ -151,7 +151,7 @@ export class TicketServiceImpl implements TicketService {
         if (ticket instanceof LogError)
             return new LogError({numError: 404, text: "Ticket not exists"});
 
-        return  await this.ticketController.closeTicket(id);
+        return await this.ticketController.closeTicket(id);
     }
 
     /**
@@ -163,7 +163,41 @@ export class TicketServiceImpl implements TicketService {
         if (ticket instanceof LogError)
             return new LogError({numError: 404, text: "Ticket not exists"});
 
-        return  await this.ticketController.archiveTicket(id);
+        return await this.ticketController.archiveTicket(id);
+    }
+
+    /**
+     * assigner un développeur à un ticket
+     * @param ticketId
+     * @param userMail
+     */
+    async assignUserToTicket(ticketId: number, userMail: string): Promise<TicketModel | LogError> {
+        const ticket = await this.ticketController.getTicketById(ticketId);
+        if (ticket instanceof LogError)
+            return new LogError({numError: 409, text: "Task not exists"});
+
+        const user = await this.userService.getUserByMail(userMail);
+        if (user instanceof LogError)
+            return new LogError({numError: 404, text: "User not exists"});
+
+        return this.ticketController.assignUserToTicket(ticketId, userMail);
+    }
+
+    /**
+     * désassigner un développeur à un ticket
+     * @param ticketId
+     * @param userMail
+     */
+    async unassignUserToTicket(ticketId: number, userMail: string): Promise<boolean> {
+        const ticket = await this.ticketController.getTicketById(ticketId);
+        if (ticket instanceof LogError)
+            return false;
+
+        const user = await this.userService.getUserByMail(userMail);
+        if (user instanceof LogError)
+            return false;
+
+        return this.ticketController.unassignUserToTicket(ticketId, userMail);
     }
 
 }

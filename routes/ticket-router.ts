@@ -361,6 +361,65 @@ ticketRouter.get("/status", authUserMiddleWare, async function (req, res) {
     res.status(403).end();
 });
 
+/**
+ * assignation d'un développeur à un ticket
+ * URL : /ticket/assign?ticketId={x}&userMail={x}
+ * Requete : POST
+ * ACCES : DEVELOPPEUR
+ * Nécessite d'être connecté : OUI
+ */
+ticketRouter.post("/assign", authUserMiddleWare, async function (req, res) {
+    //vérification droits d'accès
+    if (await isDevConnected(req)) {
+        const connection = await DatabaseUtils.getConnection();
+        const ticketService = new TicketServiceImpl(connection);
+
+        const ticketId = req.query.ticketId as string;
+        const userMail = req.query.userMail as string;
+
+        if (ticketId === undefined || userMail === undefined)
+            return res.status(400).end("Veuillez renseigner les informations nécessaires");
+
+        const assignation = await ticketService.assignUserToTicket(Number.parseInt(ticketId), userMail);
+
+        if (assignation instanceof LogError) {
+            LogError.HandleStatus(res, assignation);
+        } else {
+            res.status(201);
+            res.json(assignation);
+        }
+    }
+    res.status(403).end();
+});
+
+/**
+ * désassignation d'un développeur à un ticket
+ * URL : /ticket/unassign?ticketId={x}&userMail={x}
+ * Requete : DELETE
+ * ACCES : DEVELOPPEUR
+ * Nécessite d'être connecté : OUI
+ */
+ticketRouter.delete("/unassign", authUserMiddleWare, async function (req, res) {
+    //vérification droits d'accès
+    if (await isDevConnected(req)) {
+        const connection = await DatabaseUtils.getConnection();
+        const ticketService = new TicketServiceImpl(connection);
+
+        const ticketId = req.query.ticketId as string;
+        const userMail = req.query.userMail as string;
+
+        if (ticketId === undefined || userMail === undefined)
+            return res.status(400).end("Veuillez renseigner les informations nécessaires");
+
+        const success = await ticketService.unassignUserToTicket(Number.parseInt(ticketId), userMail);
+        if (success)
+            res.status(204).end();
+        else
+            res.status(404).end();
+    }
+    res.status(403).end();
+});
+
 export {
     ticketRouter
 }

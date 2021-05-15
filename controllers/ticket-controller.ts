@@ -292,7 +292,7 @@ export class TicketController {
     async openTicket(id: number): Promise<TicketModel | LogError> {
         try {
             const res = await this.connection.execute(`UPDATE TICKET
-                                                       SET status_id = 1,
+                                                       SET status_id           = 1,
                                                            ticket_closing_date = null
                                                        WHERE ticket_id = ?`, [
                 id
@@ -311,7 +311,7 @@ export class TicketController {
     async closeTicket(id: number): Promise<TicketModel | LogError> {
         try {
             const res = await this.connection.execute(`UPDATE TICKET
-                                                       SET status_id = 2,
+                                                       SET status_id           = 2,
                                                            ticket_closing_date = NOW()
                                                        WHERE ticket_id = ?`, [
                 id
@@ -330,7 +330,7 @@ export class TicketController {
     async archiveTicket(id: number): Promise<TicketModel | LogError> {
         try {
             const res = await this.connection.execute(`UPDATE TICKET
-                                                       SET status_id = 3,
+                                                       SET status_id           = 3,
                                                            ticket_closing_date = NOW()
                                                        WHERE ticket_id = ?`, [
                 id
@@ -343,6 +343,35 @@ export class TicketController {
         } catch (err) {
             console.error(err);
             return new LogError({numError: 400, text: "Ticket archive failed"});
+        }
+    }
+
+    async assignUserToTicket(ticketId: number, userMail: string): Promise<TicketModel | LogError> {
+        try {
+            await this.connection.execute(`INSERT INTO PARTICIPATE_USER_TICKET (user_id, ticket_id)
+                                           VALUES (?, ?)`, [
+                userMail, ticketId
+            ]);
+            return await this.getTicketById(ticketId);
+        } catch (err) {
+            console.error(err);
+            return new LogError({numError: 500, text: "Error during assignation"});
+        }
+    }
+
+    async unassignUserToTicket(ticketId: number, userMail: string): Promise<boolean> {
+        try {
+            const res = await this.connection.execute(`DELETE
+                                           FROM PARTICIPATE_USER_TICKET
+                                           WHERE ticket_id = ?
+                                             AND user_id = ?`, [
+                ticketId, userMail
+            ]);
+            const headers = res[0] as ResultSetHeader;
+            return headers.affectedRows > 0;
+        } catch (err) {
+            console.error(err);
+            return false;
         }
     }
 }
