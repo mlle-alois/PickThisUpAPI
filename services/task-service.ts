@@ -13,8 +13,6 @@ export interface TaskService {
 
     getMembersByTaskId(taskId: number): Promise<UserModel[]>;
 
-    getAllDevelopers(options?: TaskGetAllOptions): Promise<UserModel[]>;
-
     deleteTaskById(taskId: number): Promise<boolean>;
 
     updateTask(options: TaskUpdateOptions): Promise<TaskModel | LogError>;

@@ -1,6 +1,7 @@
 import {LogError, UserModel} from "../models";
 import {Connection, ResultSetHeader, RowDataPacket} from "mysql2/promise";
 import {compare, hash} from 'bcrypt';
+import {TaskGetAllOptions} from "./task-controller";
 
 export interface UserGetAllOptions {
     limit?: number;
@@ -135,6 +136,42 @@ export class UserController {
             }
         }
         return new LogError({numError: 404, text: "User nor found"});
+    }
+
+    /**
+     * récupération de tous les développeurs
+     * @param options
+     */
+    async getAllDevelopers(options?: TaskGetAllOptions): Promise<UserModel[]> {
+        const limit = options?.limit || 20;
+        const offset = options?.offset || 0;
+
+        const res = await this.connection.query(`SELECT user_mail,
+                                                        user_password,
+                                                        user_name,
+                                                        user_firstname,
+                                                        user_phone_number,
+                                                        profile_picture_id,
+                                                        user_type_id
+                                                 FROM USER
+                                                 WHERE user_type_id = 1 LIMIT ?, ?`, [
+            offset, limit
+        ]);
+        const data = res[0];
+        if (Array.isArray(data)) {
+            return (data as RowDataPacket[]).map(function (row: any) {
+                return new UserModel({
+                    mail: row["user_mail"],
+                    password: row["user_password"],
+                    firstname: row["user_firstname"],
+                    name: row["user_name"],
+                    phoneNumber: row["user_phone_number"],
+                    profilePictureId: row["profile_picture_id"],
+                    typeId: row["user_type_id"]
+                });
+            });
+        }
+        return [];
     }
 
     /**

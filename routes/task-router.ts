@@ -141,31 +141,6 @@ taskRouter.get("/getMembers/:id", authUserMiddleWare, async function (req, res) 
 });
 
 /**
- * récupération des développeurs assignables à une tâche
- * URL : /task/getAllDevelopers?[limit={x}&offset={x}]
- * Requete : GET
- * ACCES : DEVELOPPEUR
- * Nécessite d'être connecté : OUI
- */
-taskRouter.get("/getAllDevelopers", authUserMiddleWare, async function (req, res) {
-    //vérification droits d'accès
-    if (await isDevConnected(req)) {
-        const connection = await DatabaseUtils.getConnection();
-        const taskService = new TaskServiceImpl(connection);
-
-        const limit = req.query.limit ? Number.parseInt(req.query.limit as string) : undefined;
-        const offset = req.query.offset ? Number.parseInt(req.query.offset as string) : undefined;
-
-        const developers = await taskService.getAllDevelopers({
-            limit,
-            offset
-        });
-        res.json(developers);
-    }
-    res.status(403).end();
-});
-
-/**
  * modification d'une tache selon son id
  * URL : /task/update/:id
  * Requete : PUT

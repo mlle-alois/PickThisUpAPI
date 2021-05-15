@@ -1,5 +1,5 @@
 import {LogError, UserModel} from "../models";
-import {UserGetAllOptions} from "../controllers";
+import {TaskGetAllOptions, UserGetAllOptions} from "../controllers";
 
 export interface UserService {
 
@@ -8,6 +8,8 @@ export interface UserService {
     getUserByMail(userId: string): Promise<UserModel | LogError>;
 
     getUserByMailAndPassword(mail: string, password: string): Promise<UserModel | LogError>;
+
+    getAllDevelopers(options?: TaskGetAllOptions): Promise<UserModel[]>;
 
     //TODO à activer/implémenter au besoin
     /*createUser(options: UserModel): Promise<UserModel | LogError>;

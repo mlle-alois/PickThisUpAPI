@@ -1,4 +1,4 @@
-import {UserController, UserGetAllOptions} from "../../controllers";
+import {TaskGetAllOptions, UserController, UserGetAllOptions} from "../../controllers";
 import {LogError, UserModel} from "../../models";
 import {Connection} from "mysql2/promise";
 import {UserService} from "../user-service";
@@ -39,6 +39,14 @@ export class UserServiceImpl implements UserService {
      */
     getUserByMailAndPassword(mail: string, password: string): Promise<UserModel | LogError> {
         return this.userController.getUserByMailAndPassword(mail, password);
+    }
+
+    /**
+     * récupération des développeurs
+     * @param options
+     */
+    async getAllDevelopers(options?: TaskGetAllOptions): Promise<UserModel[]> {
+        return await this.userController.getAllDevelopers(options);
     }
 
     /**

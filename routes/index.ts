@@ -4,6 +4,7 @@ import {boardRouter} from "./board-router";
 import {listRouter} from "./list-router";
 import {taskRouter} from "./task-router";
 import {ticketRouter} from "./ticket-router";
+import {userRouter} from "./user-router";
 
 
 export function buildRoutes(app: Express) {
@@ -12,5 +13,5 @@ export function buildRoutes(app: Express) {
     app.use("/list", listRouter);
     app.use("/task", taskRouter);
     app.use("/ticket", ticketRouter);
-
+    app.use("/user", userRouter);
 }

@@ -87,14 +87,6 @@ export class TaskServiceImpl implements TaskService {
     }
 
     /**
-     * récupération des développeurs assignables à une tâche
-     * @param options
-     */
-    async getAllDevelopers(options?: TaskGetAllOptions): Promise<UserModel[]> {
-        return await this.taskController.getAllDevelopers(options);
-    }
-
-    /**
      * suppression d'une task selon son id
      * @param taskId
      */
