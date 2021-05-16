@@ -121,7 +121,7 @@ export class TaskServiceImpl implements TaskService {
             if (priority instanceof LogError)
                 return new LogError({numError: 404, text: "Priority not exists"});
         }
-        if (options.listId !== undefined) {
+        if (options.listId !== undefined && options.listId !== task.listId) {
             const list = await this.listService.getListById(options.listId);
             if (list instanceof LogError)
                 return new LogError({numError: 404, text: "List not exists"});
@@ -135,7 +135,7 @@ export class TaskServiceImpl implements TaskService {
 
         const update = await this.taskController.updateTask(options);
 
-        if (options.listId !== undefined)
+        if (options.listId !== undefined && options.listId !== task.listId)
             await this.reorderPositionsInListAfterDeleted(task.listId, task.positionInList as number);
 
         return update;
@@ -183,7 +183,7 @@ export class TaskServiceImpl implements TaskService {
         const listTasks = await this.getAllTasksFromList(list.listId);
         if (listTasks instanceof LogError)
             return false;
-        if (listTasks.length > 0 && (listTasks.length === 1 && listTasks[0].positionInList !== 1)) {
+        if (listTasks.length > 1 || (listTasks.length === 1 && listTasks[0].positionInList !== 1)) {
             if (positionDeleted !== 0) {
                 return await this.taskController.reorderPositionsInListAfterDeleted(listId, positionDeleted);
             }

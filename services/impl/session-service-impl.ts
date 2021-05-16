@@ -1,10 +1,7 @@
-import {AuthService} from "../auth-service";
-import {AuthController, IUserCreationProps, SessionController, UserController} from "../../controllers";
-import {LogError, SessionModel, UserModel} from "../../models";
-import {Connection, ResultSetHeader, RowDataPacket} from "mysql2/promise";
-import {hash} from "bcrypt";
+import {AuthController, SessionController, UserController} from "../../controllers";
+import {LogError, SessionModel} from "../../models";
+import {Connection} from "mysql2/promise";
 import {SessionService} from "../session-service";
-import {DateUtils} from "../../Utils";
 
 export class SessionServiceImpl implements SessionService {
 

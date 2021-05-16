@@ -35,7 +35,7 @@ export class AuthServiceImpl implements AuthService {
 
         //vérifier que le type user renseigné existe
         const typeUser = await this.userTypeController.getUserTypeById(properties.userTypeId);
-        if(typeUser === null) {
+        if(typeUser instanceof LogError) {
             return new LogError({numError: 400, text: "User type don't exists"});
         }
 
@@ -57,7 +57,7 @@ export class AuthServiceImpl implements AuthService {
         if (user instanceof LogError)
             return user;
 
-        //génération de token depuis la date actuelle et le login
+        //génération de token depuis la date actuelle et le mail
         const token = await hash(Date.now() + mail, 5);
 
         try {

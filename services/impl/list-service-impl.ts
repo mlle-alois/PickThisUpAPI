@@ -76,13 +76,13 @@ export class ListServiceImpl implements ListService {
         if (list instanceof LogError)
             return new LogError({numError: 404, text: "List not exists"});
 
-        if(options.boardId !== undefined) {
+        if (options.boardId !== undefined && list.boardId !== options.boardId) {
             const board = await this.boardService.getBoardById(options.boardId);
             if (board instanceof LogError)
                 return new LogError({numError: 404, text: "Board not exists"});
 
             const positionInBoard = await this.getMaxPositionInBoardById(options.boardId);
-            if(positionInBoard instanceof LogError)
+            if (positionInBoard instanceof LogError)
                 return positionInBoard;
 
             options.positionInBoard = positionInBoard + 1;
@@ -90,7 +90,7 @@ export class ListServiceImpl implements ListService {
 
         const update = await this.listController.updateList(options);
 
-        if(options.boardId !== undefined)
+        if (options.boardId !== undefined && list.boardId !== options.boardId)
             await this.reorderPositionsInBoardAfterDeleted(list.boardId, list.positionInBoard as number);
 
         return update;
@@ -106,7 +106,7 @@ export class ListServiceImpl implements ListService {
         if (list instanceof LogError)
             return false;
 
-        if(list.positionInBoard === newPositionInBoard)
+        if (list.positionInBoard === newPositionInBoard)
             return true;
 
         return list.positionInBoard < newPositionInBoard ? await this.listController.updatePositionInBoardListMinus(listId, newPositionInBoard)
@@ -126,7 +126,7 @@ export class ListServiceImpl implements ListService {
     }
 
     /**
-     * Ordonner les positions dans le tableau après suppression
+     * Ordonner les positions dans le tableau après deleted
      * @param boardId
      * @param positionDeleted
      */
@@ -135,11 +135,11 @@ export class ListServiceImpl implements ListService {
         if (board instanceof LogError)
             return false;
 
-        const boardLists =  await this.getListsByBoardId(board.boardId);
-        if(boardLists instanceof LogError)
+        const boardLists = await this.getListsByBoardId(board.boardId);
+        if (boardLists instanceof LogError)
             return false;
 
-        if(boardLists.length > 0 && (boardLists.length === 1 && boardLists[0].positionInBoard !== 1)) {
+        if (boardLists.length > 1 || (boardLists.length === 1 && boardLists[0].positionInBoard !== 1)) {
             if (positionDeleted !== 0) {
                 return await this.listController.reorderPositionsInBoardAfterDeleted(boardId, positionDeleted);
             }
@@ -151,7 +151,7 @@ export class ListServiceImpl implements ListService {
      * Récupère toutes les listes liés aux boards id
      * @param boardId
      */
-   async getListsByBoardId(boardId: number): Promise<ListModel[] | LogError>{
+    async getListsByBoardId(boardId: number): Promise<ListModel[] | LogError> {
         return this.listController.getListByBoardId(boardId);
-   }
+    }
 }

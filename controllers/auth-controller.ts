@@ -1,7 +1,5 @@
 import {LogError, UserModel} from "../models";
 import {Connection} from "mysql2/promise";
-import {hash} from "bcrypt";
-import {SessionModel} from "../models";
 import {UserController} from "./user-controller";
 import {SessionController} from "./session-controller";
 
