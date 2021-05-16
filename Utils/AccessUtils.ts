@@ -19,27 +19,6 @@ export function getAuthorizedToken(req: express.Request): string {
 }
 
 /**
- * Le token renseigné correspond à l'utilisateur concerné par la modification ou à un ADMIN
- * @param userId
- * @param req
- */
-export async function isConcernedUserConnected(userId: string, req: express.Request): Promise<boolean> {
-    const token = getAuthorizedToken(req);
-    if (token !== "") {
-        const connection = await DatabaseUtils.getConnection();
-        const sessionController = new SessionController(connection);
-        const session = await sessionController.getSessionByToken(token);
-        if (session instanceof LogError)
-            return false;
-
-        if (session.userId === userId) {
-            return true;
-        }
-    }
-    return false;
-}
-
-/**
  * récupération du mail de l'utilisateur connecté
  * @param req
  */
