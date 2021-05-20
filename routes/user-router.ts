@@ -33,6 +33,31 @@ userRouter.get("/getAllDevelopers", authUserMiddleWare, async function (req, res
     res.status(403).end();
 });
 
+
+/**
+ * récupération de
+ * URL : /user/getUserByToken/:token
+ * Requete : GET
+ * ACCES : TOUS
+ * Nécessite d'être connecté : OUI
+ */
+userRouter.get("/getUserByToken/:token", authUserMiddleWare, async function (req, res) {
+    const connection = await DatabaseUtils.getConnection();
+    const userService = new UserServiceImpl(connection);
+
+    const token = req.params.token;
+
+    if(token === undefined)
+        return res.status(400).end("Veuillez renseigner les informations nécessaires");
+
+    const user = await userService.getUserByToken(token);
+
+    if (user instanceof LogError)
+        LogError.HandleStatus(res, user);
+    else
+        res.json(user);
+});
+
 export {
     userRouter
 }

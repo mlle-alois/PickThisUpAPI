@@ -50,6 +50,14 @@ export class UserServiceImpl implements UserService {
     }
 
     /**
+     * Récupération d'un user depuis son :
+     * @param token
+     */
+    getUserByToken(token: string): Promise<UserModel | LogError> {
+        return this.userController.getUserByToken(token);
+    }
+
+    /**
      * Création d'un user
      * @param options
      */

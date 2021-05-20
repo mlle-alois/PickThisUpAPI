@@ -11,6 +11,8 @@ export interface UserService {
 
     getAllDevelopers(options?: TaskGetAllOptions): Promise<UserModel[]>;
 
+    getUserByToken(token: string): Promise<UserModel | LogError>;
+
     //TODO à activer/implémenter au besoin
     /*createUser(options: UserModel): Promise<UserModel | LogError>;
 
