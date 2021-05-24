@@ -3,7 +3,7 @@ import {SessionController, UserController} from "../controllers";
 import express from "express";
 import {LogError, SessionModel} from "../models";
 import {DateUtils} from "./DateUtils";
-import {DEV_USER_TYPE_ID} from "../consts";
+import {BLOCKED_USER_USER_TYPE_ID, DEV_USER_TYPE_ID, SUPER_ADMIN_USER_TYPE_ID} from "../consts";
 
 /**
  * Récupération du token autorisé/connecté
@@ -49,7 +49,7 @@ export function isTokenExpired(session: SessionModel, hours: number): boolean {
 }
 
 /**
- * Le token renseigné correspond à un CLIENT
+ * Le token renseigné correspond à un DEVELOPPEUR
  * @param req
  */
 export async function isDevConnected(req: express.Request): Promise<boolean> {
@@ -68,6 +68,59 @@ export async function isDevConnected(req: express.Request): Promise<boolean> {
             return false;
 
         if (user.typeId === DEV_USER_TYPE_ID) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Le token renseigné correspond à un ADMINISTRATEUR ou SUPER ADMINISTRATEUR ou DEVELOPPEUR
+ * @param req
+ */
+export async function isAdministratorConnected(req: express.Request): Promise<boolean> {
+    const token = getAuthorizedToken(req);
+    if (token !== "") {
+        const connection = await DatabaseUtils.getConnection();
+        const sessionController = new SessionController(connection);
+        const userController = new UserController(connection);
+
+        const session = await sessionController.getSessionByToken(token);
+        if (session instanceof LogError)
+            return false;
+
+        const user = await userController.getUserByMail(session.userId);
+        if (user instanceof LogError)
+            return false;
+
+        if (user.typeId === DEV_USER_TYPE_ID || user.typeId === SUPER_ADMIN_USER_TYPE_ID
+            || user.typeId === DEV_USER_TYPE_ID) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Le token renseigné correspond à un UTILISATEUR BLOQUE
+ * @param req
+ */
+export async function isBlockedUserConnected(req: express.Request): Promise<boolean> {
+    const token = getAuthorizedToken(req);
+    if (token !== "") {
+        const connection = await DatabaseUtils.getConnection();
+        const sessionController = new SessionController(connection);
+        const userController = new UserController(connection);
+
+        const session = await sessionController.getSessionByToken(token);
+        if (session instanceof LogError)
+            return false;
+
+        const user = await userController.getUserByMail(session.userId);
+        if (user instanceof LogError)
+            return false;
+
+        if (user.typeId === BLOCKED_USER_USER_TYPE_ID) {
             return true;
         }
     }

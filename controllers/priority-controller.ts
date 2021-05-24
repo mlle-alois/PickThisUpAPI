@@ -10,7 +10,7 @@ export class PriorityController {
     }
 
     /**
-     * Récupération d'un statut depuis son :
+     * Récupération d'une priorité depuis son :
      * @param priorityId
      */
     async getPriorityById(priorityId: number): Promise<PriorityModel | LogError> {

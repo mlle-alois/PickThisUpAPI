@@ -1,9 +1,9 @@
 export class DateUtils {
-  
+
     public static getCurrentTimeStamp(): string {
         return this.getCurrentDate().toISOString();
     }
-  
+
     public static getCurrentDate(): Date {
         let date = new Date();
         return new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
@@ -18,7 +18,7 @@ export class DateUtils {
      * @param date
      * @param hours
      */
-    public static addXHoursToDate(date: Date,hours: number){
+    public static addXHoursToDate(date: Date, hours: number) {
         date.setHours(date.getHours() + hours);
         return date;
     }
