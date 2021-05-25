@@ -15,22 +15,25 @@ const userRouter = express.Router();
  * ACCES : DEVELOPPEUR
  * Nécessite d'être connecté : OUI
  */
-userRouter.get("/getAllDevelopers", authUserMiddleWare, async function (req, res) {
-    //vérification droits d'accès
-    if (await isDevConnected(req)) {
-        const connection = await DatabaseUtils.getConnection();
-        const userService = new UserServiceImpl(connection);
+userRouter.get("/getAllDevelopers", authUserMiddleWare, async function (req, res, next) {
+    try {
+        if (await isDevConnected(req)) {
+            const connection = await DatabaseUtils.getConnection();
+            const userService = new UserServiceImpl(connection);
 
-        const limit = req.query.limit ? Number.parseInt(req.query.limit as string) : undefined;
-        const offset = req.query.offset ? Number.parseInt(req.query.offset as string) : undefined;
+            const limit = req.query.limit ? Number.parseInt(req.query.limit as string) : undefined;
+            const offset = req.query.offset ? Number.parseInt(req.query.offset as string) : undefined;
 
-        const developers = await userService.getAllDevelopers({
-            limit,
-            offset
-        });
-        res.json(developers);
+            const developers = await userService.getAllDevelopers({
+                limit,
+                offset
+            });
+            res.json(developers);
+        }
+        res.status(403).end();
+    } catch (err) {
+        next(err);
     }
-    res.status(403).end();
 });
 
 
@@ -41,21 +44,25 @@ userRouter.get("/getAllDevelopers", authUserMiddleWare, async function (req, res
  * ACCES : TOUS
  * Nécessite d'être connecté : OUI
  */
-userRouter.get("/getUserByToken/:token", authUserMiddleWare, async function (req, res) {
-    const connection = await DatabaseUtils.getConnection();
-    const userService = new UserServiceImpl(connection);
+userRouter.get("/getUserByToken/:token", authUserMiddleWare, async function (req, res, next) {
+    try {
+        const connection = await DatabaseUtils.getConnection();
+        const userService = new UserServiceImpl(connection);
 
-    const token = req.params.token;
+        const token = req.params.token;
 
-    if(token === undefined)
-        return res.status(400).end("Veuillez renseigner les informations nécessaires");
+        if (token === undefined)
+            return res.status(400).end("Veuillez renseigner les informations nécessaires");
 
-    const user = await userService.getUserByToken(token);
+        const user = await userService.getUserByToken(token);
 
-    if (user instanceof LogError)
-        LogError.HandleStatus(res, user);
-    else
-        res.json(user);
+        if (user instanceof LogError)
+            LogError.HandleStatus(res, user);
+        else
+            res.json(user);
+    } catch (err) {
+        next(err);
+    }
 });
 
 export {

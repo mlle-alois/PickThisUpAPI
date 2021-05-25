@@ -15,9 +15,45 @@ export class MediaServiceImpl implements MediaService {
 
     /**
      * Récupération d'un media depuis son :
+     * @param options
+     */
+    createMedia(options: MediaModel): Promise<MediaModel | LogError> {
+        return this.mediaController.createMedia(options);
+    }
+
+    /**
+     * Récupération d'un media depuis son :
      * @param mediaId
      */
     getMediaById(mediaId: number): Promise<MediaModel | LogError> {
         return this.mediaController.getMediaById(mediaId);
     }
+
+    /**
+     * Récupération des médias d'une zone
+     * @param zoneId
+     */
+    getMediaByZoneId(zoneId: number): Promise<MediaModel[]> {
+        return this.mediaController.getMediaByZoneId(zoneId);
+    }
+
+    /**
+     * Récupération de l'id de media maximum existant
+     */
+    async getMaxMediaId(): Promise<number> {
+        return this.mediaController.getMaxMediaId();
+    }
+
+    /**
+     * suppression d'un media selon son id
+     * @param mediaId
+     */
+    async deleteMedia(mediaId: number): Promise<boolean> {
+        const media = await this.getMediaById(mediaId);
+        if (media instanceof LogError)
+            return false;
+
+        return this.mediaController.deleteMedia(mediaId);
+    }
+
 }

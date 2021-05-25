@@ -14,53 +14,56 @@ const taskRouter = express.Router();
  * ACCES : DEVELOPPEUR
  * Nécessite d'être connecté : OUI
  */
-taskRouter.post("/add", authUserMiddleWare, async function (req, res) {
-    //vérification droits d'accès
-    if (await isDevConnected(req)) {
-        const connection = await DatabaseUtils.getConnection();
-        const taskService = new TaskServiceImpl(connection);
+taskRouter.post("/add", authUserMiddleWare, async function (req, res, next) {
+    try {
+        if (await isDevConnected(req)) {
+            const connection = await DatabaseUtils.getConnection();
+            const taskService = new TaskServiceImpl(connection);
 
-        const id = await taskService.getMaxTaskId() + 1;
-        const name = req.body.name;
-        const description = req.body.description ? req.body.description : null;
-        const deadline = req.body.deadline ? req.body.deadline : null;
-        const priorityId = req.body.priorityId ? req.body.priorityId : null;
-        const listId = req.body.listId;
+            const id = await taskService.getMaxTaskId() + 1;
+            const name = req.body.name;
+            const description = req.body.description ? req.body.description : null;
+            const deadline = req.body.deadline ? req.body.deadline : null;
+            const priorityId = req.body.priorityId ? req.body.priorityId : null;
+            const listId = req.body.listId;
 
-        if (name === undefined || description === undefined || listId === undefined ||
-            deadline === undefined || priorityId === undefined)
-            return res.status(400).end("Veuillez renseigner les informations nécessaires");
+            if (name === undefined || description === undefined || listId === undefined ||
+                deadline === undefined || priorityId === undefined)
+                return res.status(400).end("Veuillez renseigner les informations nécessaires");
 
-        const positionInList = await taskService.getMaxPositionInListById(listId);
-        if (positionInList instanceof LogError)
-            return LogError.HandleStatus(res, positionInList);
+            const positionInList = await taskService.getMaxPositionInListById(listId);
+            if (positionInList instanceof LogError)
+                return LogError.HandleStatus(res, positionInList);
 
-        const creatorId = await getUserMailConnected(req);
-        if (creatorId instanceof LogError)
-            return LogError.HandleStatus(res, creatorId);
+            const creatorId = await getUserMailConnected(req);
+            if (creatorId instanceof LogError)
+                return LogError.HandleStatus(res, creatorId);
 
-        const creationDate = DateUtils.getCurrentDate();
+            const creationDate = DateUtils.getCurrentDate();
 
-        const task = await taskService.createTask({
-            taskId: id,
-            taskName: name,
-            taskDescription: description,
-            taskCreationDate: creationDate,
-            taskDeadline: deadline,
-            positionInList: positionInList + 1,
-            priorityId,
-            listId,
-            creatorId
-        })
+            const task = await taskService.createTask({
+                taskId: id,
+                taskName: name,
+                taskDescription: description,
+                taskCreationDate: creationDate,
+                taskDeadline: deadline,
+                positionInList: positionInList + 1,
+                priorityId,
+                listId,
+                creatorId
+            })
 
-        if (task instanceof LogError) {
-            LogError.HandleStatus(res, task);
-        } else {
-            res.status(201);
-            res.json(task);
+            if (task instanceof LogError) {
+                LogError.HandleStatus(res, task);
+            } else {
+                res.status(201);
+                res.json(task);
+            }
         }
+        res.status(403).end();
+    } catch (err) {
+        next(err);
     }
-    res.status(403).end();
 });
 
 /**
@@ -70,22 +73,25 @@ taskRouter.post("/add", authUserMiddleWare, async function (req, res) {
  * ACCES : DEVELOPPEUR
  * Nécessite d'être connecté : OUI
  */
-taskRouter.get("/", authUserMiddleWare, async function (req, res) {
-    //vérification droits d'accès
-    if (await isDevConnected(req)) {
-        const connection = await DatabaseUtils.getConnection();
-        const taskService = new TaskServiceImpl(connection);
+taskRouter.get("/", authUserMiddleWare, async function (req, res, next) {
+    try {
+        if (await isDevConnected(req)) {
+            const connection = await DatabaseUtils.getConnection();
+            const taskService = new TaskServiceImpl(connection);
 
-        const limit = req.query.limit ? Number.parseInt(req.query.limit as string) : undefined;
-        const offset = req.query.offset ? Number.parseInt(req.query.offset as string) : undefined;
+            const limit = req.query.limit ? Number.parseInt(req.query.limit as string) : undefined;
+            const offset = req.query.offset ? Number.parseInt(req.query.offset as string) : undefined;
 
-        const tasks = await taskService.getAllTasks({
-            limit,
-            offset
-        });
-        res.json(tasks);
+            const tasks = await taskService.getAllTasks({
+                limit,
+                offset
+            });
+            res.json(tasks);
+        }
+        res.status(403).end();
+    } catch (err) {
+        next(err);
     }
-    res.status(403).end();
 });
 
 /**
@@ -95,24 +101,27 @@ taskRouter.get("/", authUserMiddleWare, async function (req, res) {
  * ACCES : DEVELOPPEUR
  * Nécessite d'être connecté : OUI
  */
-taskRouter.get("/get/:id", authUserMiddleWare, async function (req, res) {
-    //vérification droits d'accès
-    if (await isDevConnected(req)) {
-        const connection = await DatabaseUtils.getConnection();
-        const taskService = new TaskServiceImpl(connection);
+taskRouter.get("/get/:id", authUserMiddleWare, async function (req, res, next) {
+    try {
+        if (await isDevConnected(req)) {
+            const connection = await DatabaseUtils.getConnection();
+            const taskService = new TaskServiceImpl(connection);
 
-        const id = req.params.id;
+            const id = req.params.id;
 
-        if (id === undefined)
-            return res.status(400).end("Veuillez renseigner les informations nécessaires");
+            if (id === undefined)
+                return res.status(400).end("Veuillez renseigner les informations nécessaires");
 
-        const task = await taskService.getTaskById(Number.parseInt(id));
-        if (task instanceof LogError)
-            LogError.HandleStatus(res, task);
-        else
-            res.json(task);
+            const task = await taskService.getTaskById(Number.parseInt(id));
+            if (task instanceof LogError)
+                LogError.HandleStatus(res, task);
+            else
+                res.json(task);
+        }
+        res.status(403).end();
+    } catch (err) {
+        next(err);
     }
-    res.status(403).end();
 });
 
 /**
@@ -122,22 +131,25 @@ taskRouter.get("/get/:id", authUserMiddleWare, async function (req, res) {
  * ACCES : DEVELOPPEUR
  * Nécessite d'être connecté : OUI
  */
-taskRouter.get("/getMembers/:id", authUserMiddleWare, async function (req, res) {
-    //vérification droits d'accès
-    if (await isDevConnected(req)) {
-        const connection = await DatabaseUtils.getConnection();
-        const taskService = new TaskServiceImpl(connection);
+taskRouter.get("/getMembers/:id", authUserMiddleWare, async function (req, res, next) {
+    try {
+        if (await isDevConnected(req)) {
+            const connection = await DatabaseUtils.getConnection();
+            const taskService = new TaskServiceImpl(connection);
 
-        const id = req.params.id;
+            const id = req.params.id;
 
-        if (id === undefined)
-            return res.status(400).end("Veuillez renseigner les informations nécessaires");
+            if (id === undefined)
+                return res.status(400).end("Veuillez renseigner les informations nécessaires");
 
-        const members = await taskService.getMembersByTaskId(Number.parseInt(id));
+            const members = await taskService.getMembersByTaskId(Number.parseInt(id));
 
-        res.json(members);
+            res.json(members);
+        }
+        res.status(403).end();
+    } catch (err) {
+        next(err);
     }
-    res.status(403).end();
 });
 
 /**
@@ -147,42 +159,45 @@ taskRouter.get("/getMembers/:id", authUserMiddleWare, async function (req, res) 
  * ACCES : DEVELOPPEUR
  * Nécessite d'être connecté : OUI
  */
-taskRouter.put("/update/:id", authUserMiddleWare, async function (req, res) {
-    //vérification droits d'accès
-    if (await isDevConnected(req)) {
-        const id = req.params.id;
-        const name = req.body.name;
-        const description = req.body.description;
-        const deadline = req.body.deadline;
-        const statusId = req.body.statusId;
-        const priorityId = req.body.priorityId;
-        const listId = req.body.listId;
+taskRouter.put("/update/:id", authUserMiddleWare, async function (req, res, next) {
+    try {
+        if (await isDevConnected(req)) {
+            const id = req.params.id;
+            const name = req.body.name;
+            const description = req.body.description;
+            const deadline = req.body.deadline;
+            const statusId = req.body.statusId;
+            const priorityId = req.body.priorityId;
+            const listId = req.body.listId;
 
-        if (id === undefined || (name === undefined && description === undefined &&
-            listId === undefined && deadline === undefined && statusId === undefined &&
-            priorityId === undefined)) {
-            res.status(400).end("Veuillez renseigner les informations nécessaires");
-            return;
+            if (id === undefined || (name === undefined && description === undefined &&
+                listId === undefined && deadline === undefined && statusId === undefined &&
+                priorityId === undefined)) {
+                res.status(400).end("Veuillez renseigner les informations nécessaires");
+                return;
+            }
+            const connection = await DatabaseUtils.getConnection();
+            const taskService = new TaskServiceImpl(connection);
+
+            const task = await taskService.updateTask({
+                taskId: Number.parseInt(id),
+                taskName: name,
+                taskDescription: description,
+                taskDeadline: deadline,
+                statusId,
+                priorityId,
+                listId
+            });
+
+            if (task instanceof LogError)
+                LogError.HandleStatus(res, task);
+            else
+                res.json(task);
         }
-        const connection = await DatabaseUtils.getConnection();
-        const taskService = new TaskServiceImpl(connection);
-
-        const task = await taskService.updateTask({
-            taskId: Number.parseInt(id),
-            taskName: name,
-            taskDescription: description,
-            taskDeadline: deadline,
-            statusId,
-            priorityId,
-            listId
-        });
-
-        if (task instanceof LogError)
-            LogError.HandleStatus(res, task);
-        else
-            res.json(task);
+        res.status(403).end();
+    } catch (err) {
+        next(err);
     }
-    res.status(403).end();
 });
 
 /**
@@ -192,27 +207,30 @@ taskRouter.put("/update/:id", authUserMiddleWare, async function (req, res) {
  * ACCES : DEVELOPPEUR
  * Nécessite d'être connecté : OUI
  */
-taskRouter.put("/update-position/:id", authUserMiddleWare, async function (req, res) {
-    //vérification droits d'accès
-    if (await isDevConnected(req)) {
-        const id = req.params.id;
-        const positionInList = req.body.position;
+taskRouter.put("/update-position/:id", authUserMiddleWare, async function (req, res, next) {
+    try {
+        if (await isDevConnected(req)) {
+            const id = req.params.id;
+            const positionInList = req.body.position;
 
-        if (id === undefined || positionInList === undefined) {
-            res.status(400).end("Veuillez renseigner les informations nécessaires");
-            return;
+            if (id === undefined || positionInList === undefined) {
+                res.status(400).end("Veuillez renseigner les informations nécessaires");
+                return;
+            }
+            const connection = await DatabaseUtils.getConnection();
+            const taskService = new TaskServiceImpl(connection);
+
+            const success = await taskService.updatePositionInListTask(Number.parseInt(id), positionInList);
+
+            if (success)
+                res.status(204).end();
+            else
+                res.status(404).end();
         }
-        const connection = await DatabaseUtils.getConnection();
-        const taskService = new TaskServiceImpl(connection);
-
-        const success = await taskService.updatePositionInListTask(Number.parseInt(id), positionInList);
-
-        if (success)
-            res.status(204).end();
-        else
-            res.status(404).end();
+        res.status(403).end();
+    } catch (err) {
+        next(err);
     }
-    res.status(403).end();
 });
 
 /**
@@ -222,24 +240,27 @@ taskRouter.put("/update-position/:id", authUserMiddleWare, async function (req, 
  * ACCES : DEVELOPPEUR
  * Nécessite d'être connecté : OUI
  */
-taskRouter.delete("/delete/:id", authUserMiddleWare, async function (req, res) {
-    //vérification droits d'accès
-    if (await isDevConnected(req)) {
-        const connection = await DatabaseUtils.getConnection();
-        const taskService = new TaskServiceImpl(connection);
+taskRouter.delete("/delete/:id", authUserMiddleWare, async function (req, res, next) {
+    try {
+        if (await isDevConnected(req)) {
+            const connection = await DatabaseUtils.getConnection();
+            const taskService = new TaskServiceImpl(connection);
 
-        const id = req.params.id;
+            const id = req.params.id;
 
-        if (id === undefined)
-            return res.status(400).end("Veuillez renseigner les informations nécessaires");
+            if (id === undefined)
+                return res.status(400).end("Veuillez renseigner les informations nécessaires");
 
-        const success = await taskService.deleteTaskById(Number.parseInt(id));
-        if (success)
-            res.status(204).end();
-        else
-            res.status(404).end();
+            const success = await taskService.deleteTaskById(Number.parseInt(id));
+            if (success)
+                res.status(204).end();
+            else
+                res.status(404).end();
+        }
+        res.status(403).end();
+    } catch (err) {
+        next(err);
     }
-    res.status(403).end();
 });
 
 /**
@@ -249,26 +270,29 @@ taskRouter.delete("/delete/:id", authUserMiddleWare, async function (req, res) {
  * ACCES : DEVELOPPEUR
  * Nécessite d'être connecté : OUI
  */
-taskRouter.get("/list/:id", authUserMiddleWare, async function (req, res) {
-    //vérification droits d'accès
-    if (await isDevConnected(req)) {
-        const connection = await DatabaseUtils.getConnection();
-        const taskService = new TaskServiceImpl(connection);
+taskRouter.get("/list/:id", authUserMiddleWare, async function (req, res, next) {
+    try {
+        if (await isDevConnected(req)) {
+            const connection = await DatabaseUtils.getConnection();
+            const taskService = new TaskServiceImpl(connection);
 
-        const id = req.params.id
-        const limit = req.query.limit ? Number.parseInt(req.query.limit as string) : undefined;
-        const offset = req.query.offset ? Number.parseInt(req.query.offset as string) : undefined;
+            const id = req.params.id
+            const limit = req.query.limit ? Number.parseInt(req.query.limit as string) : undefined;
+            const offset = req.query.offset ? Number.parseInt(req.query.offset as string) : undefined;
 
-        if (id === undefined)
-            return res.status(400).end("Veuillez renseigner les informations nécessaires");
+            if (id === undefined)
+                return res.status(400).end("Veuillez renseigner les informations nécessaires");
 
-        const task = await taskService.getAllTasksFromList(Number.parseInt(id),{limit,offset});
-        if (task instanceof LogError)
-            LogError.HandleStatus(res, task);
-        else
-            res.json(task);
+            const task = await taskService.getAllTasksFromList(Number.parseInt(id), {limit, offset});
+            if (task instanceof LogError)
+                LogError.HandleStatus(res, task);
+            else
+                res.json(task);
+        }
+        res.status(403).end();
+    } catch (err) {
+        next(err);
     }
-    res.status(403).end();
 });
 
 /**
@@ -278,28 +302,31 @@ taskRouter.get("/list/:id", authUserMiddleWare, async function (req, res) {
  * ACCES : DEVELOPPEUR
  * Nécessite d'être connecté : OUI
  */
-taskRouter.post("/assign", authUserMiddleWare, async function (req, res) {
-    //vérification droits d'accès
-    if (await isDevConnected(req)) {
-        const connection = await DatabaseUtils.getConnection();
-        const taskService = new TaskServiceImpl(connection);
+taskRouter.post("/assign", authUserMiddleWare, async function (req, res, next) {
+    try {
+        if (await isDevConnected(req)) {
+            const connection = await DatabaseUtils.getConnection();
+            const taskService = new TaskServiceImpl(connection);
 
-        const taskId = req.body.taskId as string;
-        const userMail = req.body.userMail as string;
+            const taskId = req.body.taskId as string;
+            const userMail = req.body.userMail as string;
 
-        if (taskId === undefined || userMail === undefined)
-            return res.status(400).end("Veuillez renseigner les informations nécessaires");
+            if (taskId === undefined || userMail === undefined)
+                return res.status(400).end("Veuillez renseigner les informations nécessaires");
 
-        const assignation = await taskService.assignUserToTask(Number.parseInt(taskId), userMail)
+            const assignation = await taskService.assignUserToTask(Number.parseInt(taskId), userMail)
 
-        if (assignation instanceof LogError) {
-            LogError.HandleStatus(res, assignation);
-        } else {
-            res.status(201);
-            res.json(assignation);
+            if (assignation instanceof LogError) {
+                LogError.HandleStatus(res, assignation);
+            } else {
+                res.status(201);
+                res.json(assignation);
+            }
         }
+        res.status(403).end();
+    } catch (err) {
+        next(err);
     }
-    res.status(403).end();
 });
 
 /**
@@ -309,25 +336,28 @@ taskRouter.post("/assign", authUserMiddleWare, async function (req, res) {
  * ACCES : DEVELOPPEUR
  * Nécessite d'être connecté : OUI
  */
-taskRouter.delete("/unassign", authUserMiddleWare, async function (req, res) {
-    //vérification droits d'accès
-    if (await isDevConnected(req)) {
-        const connection = await DatabaseUtils.getConnection();
-        const taskService = new TaskServiceImpl(connection);
+taskRouter.delete("/unassign", authUserMiddleWare, async function (req, res, next) {
+    try {
+        if (await isDevConnected(req)) {
+            const connection = await DatabaseUtils.getConnection();
+            const taskService = new TaskServiceImpl(connection);
 
-        const taskId = req.query.taskId as string;
-        const userMail = req.query.userMail as string;
+            const taskId = req.query.taskId as string;
+            const userMail = req.query.userMail as string;
 
-        if (taskId === undefined || userMail === undefined)
-            return res.status(400).end("Veuillez renseigner les informations nécessaires");
+            if (taskId === undefined || userMail === undefined)
+                return res.status(400).end("Veuillez renseigner les informations nécessaires");
 
-        const success = await taskService.unassignUserToTask(Number.parseInt(taskId), userMail);
-        if (success)
-            res.status(204).end();
-        else
-            res.status(404).end();
+            const success = await taskService.unassignUserToTask(Number.parseInt(taskId), userMail);
+            if (success)
+                res.status(204).end();
+            else
+                res.status(404).end();
+        }
+        res.status(403).end();
+    } catch (err) {
+        next(err);
     }
-    res.status(403).end();
 });
 
 export {

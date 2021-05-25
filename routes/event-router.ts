@@ -21,7 +21,7 @@ const eventRouter = express.Router();
  * ACCES : TOUS sauf UTILISATEUR BLOQUE
  * Nécessite d'être connecté : OUI
  */
-eventRouter.post("/add", authUserMiddleWare, async function (req, res) {
+eventRouter.post("/add", authUserMiddleWare, async function (req, res, next) {
     //vérification droits d'accès
     if (!await isBlockedUserConnected(req)) {
         const connection = await DatabaseUtils.getConnection();
@@ -82,7 +82,7 @@ eventRouter.post("/add", authUserMiddleWare, async function (req, res) {
  * ACCES : TOUS
  * Nécessite d'être connecté : OUI
  */
-eventRouter.get("/", authUserMiddleWare, async function (req, res) {
+eventRouter.get("/", authUserMiddleWare, async function (req, res, next) {
     const connection = await DatabaseUtils.getConnection();
     const eventService = new EventServiceImpl(connection);
 
@@ -103,7 +103,7 @@ eventRouter.get("/", authUserMiddleWare, async function (req, res) {
  * ACCES : TOUS
  * Nécessite d'être connecté : OUI
  */
-eventRouter.get("/get/:id", authUserMiddleWare, async function (req, res) {
+eventRouter.get("/get/:id", authUserMiddleWare, async function (req, res, next) {
     const connection = await DatabaseUtils.getConnection();
     const eventService = new EventServiceImpl(connection);
 
@@ -127,7 +127,7 @@ eventRouter.get("/get/:id", authUserMiddleWare, async function (req, res) {
  * ACCES : TOUS sauf UTILISATEUR BLOQUE
  * Nécessite d'être connecté : OUI
  */
-eventRouter.put("/update/:id", authUserMiddleWare, async function (req, res) {
+eventRouter.put("/update/:id", authUserMiddleWare, async function (req, res, next) {
     //vérification droits d'accès
     if (!await isBlockedUserConnected(req)) {
         const id = req.params.id;
@@ -171,7 +171,7 @@ eventRouter.put("/update/:id", authUserMiddleWare, async function (req, res) {
  * ACCES : TOUS sauf UTILISATEUR BLOQUE
  * Nécessite d'être connecté : OUI
  */
-eventRouter.delete("/delete/:id", authUserMiddleWare, async function (req, res) {
+eventRouter.delete("/delete/:id", authUserMiddleWare, async function (req, res, next) {
     if (await isDevConnected(req)) {
         const connection = await DatabaseUtils.getConnection();
         const eventService = new EventServiceImpl(connection);
@@ -198,7 +198,7 @@ eventRouter.delete("/delete/:id", authUserMiddleWare, async function (req, res) 
  * ACCES : TOUS
  * Nécessite d'être connecté : OUI
  */
-eventRouter.post("/register/:id", authUserMiddleWare, async function (req, res) {
+eventRouter.post("/register/:id", authUserMiddleWare, async function (req, res, next) {
     const connection = await DatabaseUtils.getConnection();
     const eventService = new EventServiceImpl(connection);
 
@@ -208,7 +208,7 @@ eventRouter.post("/register/:id", authUserMiddleWare, async function (req, res) 
         return res.status(400).end("Veuillez renseigner les informations nécessaires");
 
     const userMail = await getUserMailConnected(req);
-    if(userMail instanceof LogError)
+    if (userMail instanceof LogError)
         return LogError.HandleStatus(res, userMail);
 
     const participants = await eventService.registerEvent(Number.parseInt(id), userMail);
@@ -226,7 +226,7 @@ eventRouter.post("/register/:id", authUserMiddleWare, async function (req, res) 
  * ACCES : TOUS
  * Nécessite d'être connecté : OUI
  */
-eventRouter.delete("/unregister/:id", authUserMiddleWare, async function (req, res) {
+eventRouter.delete("/unregister/:id", authUserMiddleWare, async function (req, res, next) {
     const connection = await DatabaseUtils.getConnection();
     const eventService = new EventServiceImpl(connection);
 
@@ -236,7 +236,7 @@ eventRouter.delete("/unregister/:id", authUserMiddleWare, async function (req, r
         return res.status(400).end("Veuillez renseigner les informations nécessaires");
 
     const userMail = await getUserMailConnected(req);
-    if(userMail instanceof LogError)
+    if (userMail instanceof LogError)
         return LogError.HandleStatus(res, userMail);
 
     const participants = await eventService.unregisterEvent(Number.parseInt(id), userMail);
@@ -254,7 +254,7 @@ eventRouter.delete("/unregister/:id", authUserMiddleWare, async function (req, r
  * ACCES : TOUS
  * Nécessite d'être connecté : OUI
  */
-eventRouter.get("/getPastEventsByUser", authUserMiddleWare, async function (req, res) {
+eventRouter.get("/getPastEventsByUser", authUserMiddleWare, async function (req, res, next) {
     const connection = await DatabaseUtils.getConnection();
     const eventService = new EventServiceImpl(connection);
 
@@ -277,7 +277,7 @@ eventRouter.get("/getPastEventsByUser", authUserMiddleWare, async function (req,
  * ACCES : TOUS
  * Nécessite d'être connecté : OUI
  */
-eventRouter.get("/getFutureEventsByUser", authUserMiddleWare, async function (req, res) {
+eventRouter.get("/getFutureEventsByUser", authUserMiddleWare, async function (req, res, next) {
     const connection = await DatabaseUtils.getConnection();
     const eventService = new EventServiceImpl(connection);
 
@@ -300,7 +300,7 @@ eventRouter.get("/getFutureEventsByUser", authUserMiddleWare, async function (re
  * ACCES : TOUS
  * Nécessite d'être connecté : OUI
  */
-eventRouter.get("/getActualEventsByUser", authUserMiddleWare, async function (req, res) {
+eventRouter.get("/getActualEventsByUser", authUserMiddleWare, async function (req, res, next) {
     const connection = await DatabaseUtils.getConnection();
     const eventService = new EventServiceImpl(connection);
 
@@ -323,7 +323,7 @@ eventRouter.get("/getActualEventsByUser", authUserMiddleWare, async function (re
  * ACCES : ADMIN ou SUPER ADMIN ou DEV
  * Nécessite d'être connecté : OUI
  */
-eventRouter.put("/accept/:id", authUserMiddleWare, async function (req, res) {
+eventRouter.put("/accept/:id", authUserMiddleWare, async function (req, res, next) {
     if (await isAdministratorConnected(req)) {
         const connection = await DatabaseUtils.getConnection();
         const eventService = new EventServiceImpl(connection);
@@ -350,7 +350,7 @@ eventRouter.put("/accept/:id", authUserMiddleWare, async function (req, res) {
  * ACCES : ADMIN ou SUPER ADMIN ou DEV
  * Nécessite d'être connecté : OUI
  */
-eventRouter.put("/refuse/:id", authUserMiddleWare, async function (req, res) {
+eventRouter.put("/refuse/:id", authUserMiddleWare, async function (req, res, next) {
     if (await isAdministratorConnected(req)) {
         const connection = await DatabaseUtils.getConnection();
         const eventService = new EventServiceImpl(connection);
@@ -377,21 +377,25 @@ eventRouter.put("/refuse/:id", authUserMiddleWare, async function (req, res) {
  * ACCES : TOUS
  * Nécessite d'être connecté : OUI
  */
-eventRouter.get("/getParticipants/:id", authUserMiddleWare, async function (req, res) {
-    const connection = await DatabaseUtils.getConnection();
-    const eventService = new EventServiceImpl(connection);
+eventRouter.get("/getParticipants/:id", authUserMiddleWare, async function (req, res, next) {
+    try {
+        const connection = await DatabaseUtils.getConnection();
+        const eventService = new EventServiceImpl(connection);
 
-    const id = req.params.id;
+        const id = req.params.id;
 
-    if (id === undefined)
-        return res.status(400).end("Veuillez renseigner les informations nécessaires");
+        if (id === undefined)
+            return res.status(400).end("Veuillez renseigner les informations nécessaires");
 
-    const participants = await eventService.getParticipantsEvent(Number.parseInt(id));
+        const participants = await eventService.getParticipantsEvent(Number.parseInt(id));
 
-    if (participants instanceof LogError)
-        LogError.HandleStatus(res, participants);
-    else
-        res.json(participants);
+        if (participants instanceof LogError)
+            LogError.HandleStatus(res, participants);
+        else
+            res.json(participants);
+    } catch (err) {
+        next(err);
+    }
 });
 
 export {

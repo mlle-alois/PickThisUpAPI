@@ -3,7 +3,7 @@ import {
     ZoneGetAllOptions,
     ZoneUpdateOptions
 } from "../../controllers";
-import {LogError, ZoneModel, UserModel} from "../../models";
+import {LogError, ZoneModel, UserModel, MediaModel} from "../../models";
 import {Connection} from "mysql2/promise";
 import {ZoneService} from "../zone-service";
 import {UserServiceImpl} from "./user-service-impl";
@@ -19,14 +19,14 @@ export class ZoneServiceImpl implements ZoneService {
     private zoneController: ZoneController;
     private userService: UserServiceImpl;
     private statusService: StatusServiceImpl;
-    private mediaServcice: MediaServiceImpl;
+    private mediaService: MediaServiceImpl;
 
     constructor(connection: Connection) {
         this.connection = connection;
         this.zoneController = new ZoneController(this.connection);
         this.userService = new UserServiceImpl(this.connection);
         this.statusService = new StatusServiceImpl(this.connection);
-        this.mediaServcice = new MediaServiceImpl(this.connection);
+        this.mediaService = new MediaServiceImpl(this.connection);
     }
 
     /**
@@ -79,7 +79,7 @@ export class ZoneServiceImpl implements ZoneService {
      * suppression d'une zone selon son id
      * @param zoneId
      */
-    async deleteZonesById(zoneId: number): Promise<boolean> {
+    async deleteZoneById(zoneId: number): Promise<boolean> {
         const zone = await this.getZoneById(zoneId);
         if (zone instanceof LogError)
             return false;
@@ -146,6 +146,44 @@ export class ZoneServiceImpl implements ZoneService {
             return new LogError({numError: 404, text: "Zone don't exists"});
 
         return await this.zoneController.refuseZone(zoneId);
+    }
+
+    /**
+     * Création d'un media
+     * @param options
+     * @param zoneId
+     */
+    async addMediaToZone(options: MediaModel, zoneId: number): Promise<MediaModel | LogError> {
+        const zone = await this.getZoneById(zoneId);
+        if (zone instanceof LogError)
+            return new LogError({numError: 404, text: "Zone don't exists"});
+
+        const media = await this.mediaService.createMedia(options);
+        if(media instanceof LogError)
+            return media;
+
+        return this.zoneController.addMediaToZone(media.mediaId, zoneId);
+    }
+
+    /**
+     * suppression d'un media selon son id
+     * @param mediaId
+     * @param zoneId
+     */
+    async removeMediaToZone(mediaId: number, zoneId: number): Promise<boolean> {
+        const media = await this.mediaService.getMediaById(mediaId);
+        if (media instanceof LogError)
+            return false;
+
+        const zone = await this.getZoneById(zoneId);
+        if (zone instanceof LogError)
+            return false;
+
+        const success = this.zoneController.removeMediaToZone(mediaId, zoneId);
+        if(!success)
+            return false;
+
+        return this.mediaService.deleteMedia(mediaId);
     }
 
 }

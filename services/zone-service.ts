@@ -1,4 +1,4 @@
-import {LogError, ZoneModel, UserModel} from "../models";
+import {LogError, ZoneModel, UserModel, MediaModel} from "../models";
 import {ZoneGetAllOptions, ZoneUpdateOptions} from "../controllers";
 
 export interface ZoneService {
@@ -11,7 +11,7 @@ export interface ZoneService {
 
     updateZone(options: ZoneUpdateOptions): Promise<ZoneModel | LogError>;
 
-    deleteZonesById(zoneId: number): Promise<boolean>;
+    deleteZoneById(zoneId: number): Promise<boolean>;
 
     getAllAvailableZones(userMail: string, options?: ZoneGetAllOptions): Promise<ZoneModel[] | LogError>;
 
@@ -22,4 +22,8 @@ export interface ZoneService {
     getZonesByUser(userMail: string): Promise<ZoneModel[] | LogError>;
 
     getZonesByUserAndStatus(userMail: string, statusId: number): Promise<ZoneModel[] | LogError>;
+
+    addMediaToZone(options: MediaModel, zoneId: number): Promise<MediaModel | LogError>;
+
+    removeMediaToZone(mediaId: number, zoneId: number): Promise<boolean>;
 }

@@ -15,18 +15,22 @@ const statusRouter = express.Router();
  * ACCES : TOUS
  * Nécessite d'être connecté : OUI
  */
-statusRouter.get("/", authUserMiddleWare, async function (req, res) {
-    const connection = await DatabaseUtils.getConnection();
-    const statusService = new StatusServiceImpl(connection);
+statusRouter.get("/", authUserMiddleWare, async function (req, res, next) {
+    try {
+        const connection = await DatabaseUtils.getConnection();
+        const statusService = new StatusServiceImpl(connection);
 
-    const limit = req.query.limit ? Number.parseInt(req.query.limit as string) : undefined;
-    const offset = req.query.offset ? Number.parseInt(req.query.offset as string) : undefined;
+        const limit = req.query.limit ? Number.parseInt(req.query.limit as string) : undefined;
+        const offset = req.query.offset ? Number.parseInt(req.query.offset as string) : undefined;
 
-    const status = await statusService.getAllStatus({
-        limit,
-        offset
-    });
-    res.json(status);
+        const status = await statusService.getAllStatus({
+            limit,
+            offset
+        });
+        res.json(status);
+    } catch (err) {
+        next(err);
+    }
 });
 
 export {

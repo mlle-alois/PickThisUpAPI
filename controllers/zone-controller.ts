@@ -1,6 +1,7 @@
-import {ZoneModel, LogError, UserModel} from "../models";
+import {ZoneModel, LogError, UserModel, MediaModel} from "../models";
 import {Connection, ResultSetHeader, RowDataPacket} from "mysql2/promise";
 import {DateUtils} from "../Utils";
+import {MediaServiceImpl} from "../services/impl/media-service-impl";
 
 export interface ZoneGetAllOptions {
     limit?: number;
@@ -18,9 +19,11 @@ export interface ZoneUpdateOptions {
 export class ZoneController {
 
     private connection: Connection;
+    private mediaService: MediaServiceImpl;
 
     constructor(connection: Connection) {
         this.connection = connection;
+        this.mediaService = new MediaServiceImpl(this.connection);
     }
 
     async getAllAvailableZones(userMail: string, options?: ZoneGetAllOptions): Promise<ZoneModel[]> {
@@ -272,6 +275,36 @@ export class ZoneController {
         } catch (err) {
             console.error(err);
             return new LogError({numError: 400, text: "The zone refusal failed"});
+        }
+    }
+
+    async addMediaToZone(mediaId: number, zoneId: number): Promise<MediaModel | LogError> {
+        try {
+            await this.connection.execute(`INSERT INTO HAVE_ZONE_PICTURES (media_id, zone_id)
+                                           VALUES (?, ?)`, [
+                mediaId, zoneId
+            ]);
+
+            return await this.mediaService.getMediaById(mediaId);
+        } catch (err) {
+            console.error(err);
+            return new LogError({numError: 500, text: "Error during media creation"});
+        }
+    }
+
+    async removeMediaToZone(mediaId: number, zoneId: number): Promise<boolean> {
+        try {
+            const res = await this.connection.query(`DELETE
+                                                     FROM HAVE_ZONE_PICTURES
+                                                     WHERE media_id = ?
+                                                     AND zone_id = ?`, [
+                mediaId, zoneId
+            ]);
+            const headers = res[0] as ResultSetHeader;
+            return headers.affectedRows > 0;
+        } catch (err) {
+            console.error(err);
+            return false;
         }
     }
 }
