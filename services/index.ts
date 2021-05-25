@@ -10,3 +10,4 @@ export * from './task-service';
 export * from './ticket-service';
 export * from './user-service';
 export * from './user-type-service';
+export * from './zone-service';

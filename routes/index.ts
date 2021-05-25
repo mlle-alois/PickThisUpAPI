@@ -7,6 +7,7 @@ import {ticketRouter} from "./ticket-router";
 import {userRouter} from "./user-router";
 import {eventRouter} from "./event-router";
 import {statusRouter} from "./status-router";
+import {zoneRouter} from "./zone-router";
 
 
 export function buildRoutes(app: Express) {
@@ -18,4 +19,5 @@ export function buildRoutes(app: Express) {
     app.use("/user", userRouter);
     app.use("/event", eventRouter);
     app.use("/status", statusRouter);
+    app.use("/zone", zoneRouter);
 }

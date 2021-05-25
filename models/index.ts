@@ -10,3 +10,4 @@ export * from './task-model';
 export * from './ticket-model';
 export * from './user-model';
 export * from './user-type-model';
+export * from './zone-model';

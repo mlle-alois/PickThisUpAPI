@@ -89,7 +89,7 @@ eventRouter.get("/", authUserMiddleWare, async function (req, res) {
     const limit = req.query.limit ? Number.parseInt(req.query.limit as string) : undefined;
     const offset = req.query.offset ? Number.parseInt(req.query.offset as string) : undefined;
 
-    const eventList = await eventService.getAllEvents({
+    const eventList = await eventService.getAllValidatedEvents({
         limit,
         offset
     });

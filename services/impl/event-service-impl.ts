@@ -9,6 +9,7 @@ import {EventService} from "../event-service";
 import {UserServiceImpl} from "./user-service-impl";
 import {StatusServiceImpl} from "./status-service-impl";
 import {MediaServiceImpl} from "./media-service-impl";
+import {ZoneServiceImpl} from "./zone-service-impl";
 
 export class EventServiceImpl implements EventService {
 
@@ -17,6 +18,7 @@ export class EventServiceImpl implements EventService {
     private userService: UserServiceImpl;
     private statusService: StatusServiceImpl;
     private mediaServcice: MediaServiceImpl;
+    private zoneService: ZoneServiceImpl;
 
     constructor(connection: Connection) {
         this.connection = connection;
@@ -24,14 +26,15 @@ export class EventServiceImpl implements EventService {
         this.userService = new UserServiceImpl(this.connection);
         this.statusService = new StatusServiceImpl(this.connection);
         this.mediaServcice = new MediaServiceImpl(this.connection);
+        this.zoneService = new ZoneServiceImpl(this.connection);
     }
 
     /**
-     * Récupération de tous les tableaux
+     * Récupération de tous les events validés
      * @param options -> Limit et offset de la requete
      */
-    async getAllEvents(options?: EventGetAllOptions): Promise<EventModel[]> {
-        return this.eventController.getAllEvents(options);
+    async getAllValidatedEvents(options?: EventGetAllOptions): Promise<EventModel[]> {
+        return this.eventController.getAllValidatedEvents(options);
     }
 
     /**
@@ -61,7 +64,14 @@ export class EventServiceImpl implements EventService {
         const picture = await this.mediaServcice.getMediaById(options.eventPitureId);
         if(picture instanceof LogError)
             return new LogError({numError: 404, text: "Picture don't exists"});
-        //TODO vérifier valeur existante zone
+
+        const creator = await this.userService.getUserByMail(options.creatorId);
+        if (creator instanceof LogError)
+            return new LogError({numError: 404, text: "User don't exists"});
+
+        const zone = await this.zoneService.getZoneById(options.zoneId);
+        if(zone instanceof LogError)
+            return new LogError({numError: 404, text: "Zone don't exists"});
 
         return this.eventController.createEvent(options);
     }

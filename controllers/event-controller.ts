@@ -26,7 +26,7 @@ export class EventController {
         this.connection = connection;
     }
 
-    async getAllEvents(options?: EventGetAllOptions): Promise<EventModel[]> {
+    async getAllValidatedEvents(options?: EventGetAllOptions): Promise<EventModel[]> {
         const limit = options?.limit || 20;
         const offset = options?.offset || 0;
 
@@ -42,6 +42,7 @@ export class EventController {
                                                         creator_id,
                                                         zone_id
                                                  FROM EVENT
+                                                 WHERE status_id = 4
                                                  ORDER BY status_id ASC, date_hour_start DESC LIMIT ?, ?`, [
             offset, limit
         ]);
@@ -139,8 +140,8 @@ export class EventController {
                 options.eventId,
                 options.eventTitle,
                 options.eventDescription,
-                DateUtils.addXHoursToDate(new Date(options.dateHourStart),2),
-                DateUtils.addXHoursToDate(new Date(options.dateHourEnd),2),
+                DateUtils.addXHoursToDate(new Date(options.dateHourStart), 2),
+                DateUtils.addXHoursToDate(new Date(options.dateHourEnd), 2),
                 options.dateHourCreation,
                 options.eventMaxNbPlaces,
                 options.eventPitureId,
@@ -406,8 +407,8 @@ export class EventController {
                                                         profile_picture_id,
                                                         user_type_id
                                                  FROM USER
-                                                          JOIN PARTICIPATE_USER_EVENT ON user_mail = user_id 
-                                                          WHERE event_id = ?`, [
+                                                          JOIN PARTICIPATE_USER_EVENT ON user_mail = user_id
+                                                 WHERE event_id = ?`, [
             eventId
         ]);
         const data = res[0];

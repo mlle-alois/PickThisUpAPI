@@ -3,7 +3,7 @@ import {EventGetAllOptions, IUserCreationProps} from "../controllers";
 
 export interface EventService {
 
-    getAllEvents(options?: EventGetAllOptions): Promise<EventModel[]>;
+    getAllValidatedEvents(options?: EventGetAllOptions): Promise<EventModel[]>;
 
     getMaxEventId(): Promise<number>;
 
