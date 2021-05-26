@@ -1,5 +1,6 @@
 export * from './auth-controller';
 export * from './board-controller';
+export * from './carpool-controller';
 export * from './event-controller';
 export * from './list-controller';
 export * from './media-controller';

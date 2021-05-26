@@ -1,4 +1,5 @@
 export * from './board-model';
+export * from './carpool-model';
 export * from './event-model';
 export * from './list-model';
 export * from './log-error-model';

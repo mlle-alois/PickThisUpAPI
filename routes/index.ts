@@ -8,6 +8,7 @@ import {userRouter} from "./user-router";
 import {eventRouter} from "./event-router";
 import {statusRouter} from "./status-router";
 import {zoneRouter} from "./zone-router";
+import {carpoolRouter} from "./carpool-router";
 
 
 export function buildRoutes(app: Express) {
@@ -20,4 +21,5 @@ export function buildRoutes(app: Express) {
     app.use("/event", eventRouter);
     app.use("/status", statusRouter);
     app.use("/zone", zoneRouter);
+    app.use("/carpool", carpoolRouter);
 }
