@@ -211,32 +211,13 @@ export class UserController {
     }
 
     /**
-     * Suppression d'un utilisateur depuis son :
-     * @param userId
-     */
-    /*async deleteUserById(userId: number): Promise<boolean> {
-        try {
-            const res = await this.connection.query(`DELETE FROM USER WHERE user_id = ${userId}`);
-            const headers = res[0] as ResultSetHeader;
-            return headers.affectedRows > 0;
-        } catch (err) {
-            console.error(err);
-            return false;
-        }
-    }*/
-
-    /**
      * Modification des informations d'un utilisateur renseignées dans les options
      * @param options -> informations à modifier
      */
-    /*async updateUser(options: UserUpdateOptions): Promise<UserModel | null> {
+    async updateUser(options: UserUpdateOptions): Promise<UserModel | LogError> {
         const setClause: string[] = [];
         const params = [];
-        //création des contenus de la requête dynamiquement
-        if (options.mail !== undefined) {
-            setClause.push("user_mail = ?");
-            params.push(options.mail);
-        }
+
         if (options.password !== undefined) {
             setClause.push("user_password = ?");
             const hachedPassword = await hash(options.password, 5);
@@ -254,21 +235,32 @@ export class UserController {
             setClause.push("user_phone_number = ?");
             params.push(options.phoneNumber);
         }
-        if (options.typeId !== undefined) {
-            setClause.push("user_type_id = ?");
-            params.push(options.typeId);
-        }
         params.push(options.mail);
         try {
-            const res = await this.connection.execute(`UPDATE USER SET ${setClause.join(", ")} WHERE user_id = ?`, params);
+            const res = await this.connection.execute(`UPDATE USER SET ${setClause.join(", ")} WHERE user_mail = ?`, params);
             const headers = res[0] as ResultSetHeader;
             if (headers.affectedRows > 0) {
                 return this.getUserByMail(options.mail);
             }
-            return null;
+            return new LogError({numError: 400, text: "The user update failed"});
         } catch (err) {
             console.error(err);
-            return null;
+            return new LogError({numError: 400, text: "The user update failed"});
+        }
+    }
+
+    /**
+     * Suppression d'un utilisateur depuis son :
+     * @param userId
+     */
+    /*async deleteUserById(userId: number): Promise<boolean> {
+        try {
+            const res = await this.connection.query(`DELETE FROM USER WHERE user_id = ${userId}`);
+            const headers = res[0] as ResultSetHeader;
+            return headers.affectedRows > 0;
+        } catch (err) {
+            console.error(err);
+            return false;
         }
     }*/
 }

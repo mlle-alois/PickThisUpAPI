@@ -3,6 +3,15 @@ import {LogError, UserModel} from "../../models";
 import {Connection} from "mysql2/promise";
 import {UserService} from "../user-service";
 import {UserTypeServiceImpl} from "./user-type-service-impl";
+import {compare, hash} from "bcrypt";
+
+export interface UserUpdateProps {
+    mail: string;
+    password: string;
+    name: string;
+    firstname: string;
+    phoneNumber: string;
+}
 
 export class UserServiceImpl implements UserService {
 
@@ -58,6 +67,18 @@ export class UserServiceImpl implements UserService {
     }
 
     /**
+     * Modification des informations d'un user renseignées dans les options
+     * @param options
+     */
+    async updateUser(options: UserUpdateProps): Promise<UserModel | LogError> {
+        const user = await this.userController.getUserByMail(options.mail);
+        if (user instanceof LogError)
+            return new LogError({numError: 404, text: "User not exists"});
+
+        return await this.userController.updateUser(options);
+    }
+
+    /**
      * Création d'un user
      * @param options
      */
@@ -79,24 +100,5 @@ export class UserServiceImpl implements UserService {
             return false;
 
         return await this.userController.deleteUserByMail(mail);
-    }*/
-
-    /**
-     * Modification des informations d'un user renseignées dans les options
-     * En cas de modification de tableau, la position dans le tableau est modifiée à la plus élevée existante
-     * @param options
-     */
-    /*async updateUser(options: UserUpdateProps): Promise<UserModel | LogError> {
-        const user = await this.userController.getUserByMail(options.mail);
-        if (user instanceof LogError)
-            return new LogError({numError: 404, text: "User not exists"});
-
-        if(options.typeId !== undefined) {
-            const userType = await this.userTypeService.getUserTypeById(options.typeId as number);
-            if (userType instanceof LogError)
-                return new LogError({numError: 404, text: "User type not exists"});
-        }
-
-        return await this.userController.updateUser(options);
     }*/
 }

@@ -1,10 +1,9 @@
 import express from "express";
 import {DatabaseUtils} from "../database/database";
 import {authUserMiddleWare} from "../middlewares/auth-middleware";
-import {isDevConnected} from "../Utils";
-import {BoardServiceImpl, TaskServiceImpl, UserServiceImpl} from "../services/impl";
+import {getUserMailConnected, isAdministratorConnected, isBlockedUserConnected, isDevConnected} from "../Utils";
+import {UserServiceImpl} from "../services/impl";
 import {LogError} from "../models";
-import {taskRouter} from "./task-router";
 
 const userRouter = express.Router();
 
@@ -55,6 +54,48 @@ userRouter.get("/getUserByToken/:token", authUserMiddleWare, async function (req
             return res.status(400).end("Veuillez renseigner les informations nécessaires");
 
         const user = await userService.getUserByToken(token);
+
+        if (user instanceof LogError)
+            LogError.HandleStatus(res, user);
+        else
+            res.json(user);
+    } catch (err) {
+        next(err);
+    }
+});
+
+/**
+ * modification d'un user selon son mail
+ * URL : /user/update/:mail
+ * Requete : PUT
+ * ACCES : ADMIN ou SUPER ADMIN ou DEV ou USER CONNECTE
+ * Nécessite d'être connecté : OUI
+ */
+userRouter.put("/update/:mail", authUserMiddleWare, async function (req, res, next) {
+    try {
+        const mail = req.params.mail;
+
+        if (!await isAdministratorConnected(req) && mail !== await getUserMailConnected(req))
+            return res.status(403).end();
+
+        const password = req.body.password;
+        const name = req.body.name;
+        const firstname = req.body.firstname;
+        const phone = req.body.phone;
+
+        if (mail === undefined || (password === undefined && name === undefined && firstname === undefined && phone === undefined))
+            return res.status(400).end("Veuillez renseigner les informations nécessaires");
+
+        const connection = await DatabaseUtils.getConnection();
+        const userService = new UserServiceImpl(connection);
+
+        const user = await userService.updateUser({
+            mail: mail,
+            password: password,
+            name: name,
+            firstname: firstname,
+            phoneNumber: phone
+        });
 
         if (user instanceof LogError)
             LogError.HandleStatus(res, user);
