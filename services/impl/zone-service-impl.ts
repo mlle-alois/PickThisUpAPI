@@ -186,4 +186,12 @@ export class ZoneServiceImpl implements ZoneService {
         return this.mediaService.deleteMedia(mediaId);
     }
 
+    async getMediaZonesById(zoneId: number): Promise<MediaModel[] | LogError> {
+        const zone = await this.getZoneById(zoneId);
+        if (zone instanceof LogError)
+            return new LogError({numError: 404, text: "Zone don't exists"});
+
+        return this.zoneController.getMediaZonesById(zoneId);
+    }
+
 }

@@ -26,4 +26,6 @@ export interface ZoneService {
     addMediaToZone(options: MediaModel, zoneId: number): Promise<MediaModel | LogError>;
 
     removeMediaToZone(mediaId: number, zoneId: number): Promise<boolean>;
+
+    getMediaZonesById(zoneId: number): Promise<MediaModel[] | LogError>;
 }

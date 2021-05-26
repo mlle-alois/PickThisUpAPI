@@ -307,4 +307,23 @@ export class ZoneController {
             return false;
         }
     }
+
+    async getMediaZonesById(zoneId: number): Promise<MediaModel[]> {
+        const res = await this.connection.query(`SELECT MEDIA.media_id, media_path
+                                                 FROM MEDIA
+                                                          JOIN HAVE_ZONE_PICTURES ON MEDIA.media_id = HAVE_ZONE_PICTURES.media_id
+                                                 WHERE zone_id = ?`, [
+            zoneId
+        ]);
+        const data = res[0];
+        if (Array.isArray(data)) {
+            return (data as RowDataPacket[]).map(function (row: any) {
+                return new MediaModel({
+                    mediaId: row["media_id"],
+                    mediaPath: row["media_path"]
+                });
+            });
+        }
+        return [];
+    }
 }
