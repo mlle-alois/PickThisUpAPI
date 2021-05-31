@@ -76,7 +76,7 @@ eventRouter.post("/add", authUserMiddleWare, async function (req, res, next) {
 });
 
 /**
- * récupération de tous les événements
+ * récupération de tous les événements disponibles
  * URL : /event?[limit={x}&offset={x}]
  * Requete : GET
  * ACCES : TOUS

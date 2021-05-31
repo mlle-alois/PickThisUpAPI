@@ -208,8 +208,7 @@ ticketRouter.put("/update/:id", authUserMiddleWare, async function (req, res, ne
             if (ticket instanceof LogError)
                 LogError.HandleStatus(res, ticket);
             else
-                console.log(ticket)
-            res.json(ticket);
+                res.json(ticket);
         }
         res.status(403).end();
     } catch (err) {

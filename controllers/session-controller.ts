@@ -58,7 +58,7 @@ export class SessionController {
                 });
             }
         }
-        return new LogError({numError: 404, text: "Session not found"});
+        return new LogError({numError: 403, text: "Session not found, access denied"});
     }
 
     /**

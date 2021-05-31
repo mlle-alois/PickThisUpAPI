@@ -1,4 +1,4 @@
-import {EventModel, LogError, UserModel} from "../models";
+import {EventModel, LogError, MediaModel, UserModel, ZoneModel} from "../models";
 import {Connection, ResultSetHeader, RowDataPacket} from "mysql2/promise";
 import {UserGetAllOptions} from "./user-controller";
 import {DateUtils} from "../Utils";
@@ -38,12 +38,22 @@ export class EventController {
                                                         date_hour_creation,
                                                         event_max_nb_places,
                                                         event_picture_id,
-                                                        status_id,
+                                                        coalesce(media_path, "pickThisUpLogo.PNG") as media_path,
+                                                        EVENT.status_id as event_status_id,
                                                         creator_id,
-                                                        zone_id
+                                                        EVENT.zone_id,
+                                                        zone_description,
+                                                        zone_street,
+                                                        zone_zipcode,
+                                                        zone_city,
+                                                        ZONE.status_id  as zone_status_id,
+                                                        signalman_id
                                                  FROM EVENT
-                                                 WHERE status_id = 4
-                                                 ORDER BY status_id ASC, date_hour_start DESC LIMIT ?, ?`, [
+                                                          JOIN ZONE ON ZONE.zone_id = EVENT.zone_id
+                                                          LEFT JOIN MEDIA ON EVENT.event_picture_id = MEDIA.media_id
+                                                 WHERE EVENT.status_id = 4
+                                                   AND date_hour_start > NOW()
+                                                 ORDER BY date_hour_start ASC LIMIT ?, ?`, [
             offset, limit
         ]);
         const data = res[0];
@@ -58,9 +68,22 @@ export class EventController {
                     dateHourCreation: row["date_hour_creation"],
                     eventMaxNbPlaces: row["event_max_nb_places"],
                     eventPitureId: row["event_picture_id"],
-                    statusId: row["status_id"],
+                    picture: new MediaModel({
+                        mediaId: row["event_picture_id"],
+                        mediaPath: row["media_path"]
+                    }),
+                    statusId: row["event_status_id"],
                     creatorId: row["creator_id"],
-                    zoneId: row["zone_id"]
+                    zoneId: row["zone_id"],
+                    zone: new ZoneModel({
+                        zoneId: row["zone_id"],
+                        zoneDescription: row["zone_description"],
+                        zoneStreet: row["zone_street"],
+                        zoneZipcode: row["zone_zipcode"],
+                        zoneCity: row["zone_city"],
+                        statusId: row["zone_status_id"],
+                        signalmanId: row["signalman_id"]
+                    })
                 });
             });
         }
