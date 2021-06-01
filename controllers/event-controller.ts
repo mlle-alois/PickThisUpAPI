@@ -30,30 +30,33 @@ export class EventController {
         const limit = options?.limit || 20;
         const offset = options?.offset || 0;
 
-        const res = await this.connection.query(`SELECT event_id,
+        const res = await this.connection.query(`SELECT EVENT.event_id,
                                                         event_title,
                                                         event_description,
                                                         date_hour_start,
+                                                        date_hour_start > NOW()                                as isFuture,
                                                         date_hour_end,
                                                         date_hour_creation,
                                                         event_max_nb_places,
+                                                        COALESCE(event_max_nb_places - COUNT(PUE.event_id), 0) as event_remaining_places,
                                                         event_picture_id,
-                                                        coalesce(media_path, "pickThisUpLogo.PNG") as media_path,
-                                                        EVENT.status_id as event_status_id,
+                                                        coalesce(media_path, "pickThisUpLogo.PNG")             as media_path,
+                                                        EVENT.status_id                                        as event_status_id,
                                                         creator_id,
-                                                        EVENT.zone_id,
+                                                        EVENT.zone_id                                          as zone_id,
                                                         zone_description,
                                                         zone_street,
                                                         zone_zipcode,
                                                         zone_city,
-                                                        ZONE.status_id  as zone_status_id,
+                                                        ZONE.status_id                                         as zone_status_id,
                                                         signalman_id
                                                  FROM EVENT
                                                           JOIN ZONE ON ZONE.zone_id = EVENT.zone_id
                                                           LEFT JOIN MEDIA ON EVENT.event_picture_id = MEDIA.media_id
+                                                          LEFT JOIN PARTICIPATE_USER_EVENT PUE ON EVENT.event_id = PUE.event_id
                                                  WHERE EVENT.status_id = 4
-                                                   AND date_hour_start > NOW()
-                                                 ORDER BY date_hour_start ASC LIMIT ?, ?`, [
+                                                 GROUP BY EVENT.event_id, event_title
+                                                 ORDER BY isFuture DESC, date_hour_start ASC LIMIT ?, ?`, [
             offset, limit
         ]);
         const data = res[0];
@@ -67,6 +70,7 @@ export class EventController {
                     dateHourEnd: row["date_hour_end"],
                     dateHourCreation: row["date_hour_creation"],
                     eventMaxNbPlaces: row["event_max_nb_places"],
+                    eventRemainingPlaces: row["event_remaining_places"],
                     eventPitureId: row["event_picture_id"],
                     picture: new MediaModel({
                         mediaId: row["event_picture_id"],

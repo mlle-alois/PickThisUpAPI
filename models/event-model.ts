@@ -1,5 +1,6 @@
 import {ZoneModel} from "./zone-model";
 import {MediaModel} from "./media-model";
+import {StatusModel} from "./status-model";
 
 export interface IEventProps {
     eventId: number;
@@ -9,9 +10,11 @@ export interface IEventProps {
     dateHourEnd: Date;
     dateHourCreation: Date;
     eventMaxNbPlaces: number;
+    eventRemainingPlaces?: number;
     eventPitureId: number;
     picture?: MediaModel;
     statusId: number;
+    status?: StatusModel;
     creatorId: string;
     zoneId: number;
     zone?: ZoneModel;
@@ -25,9 +28,11 @@ export class EventModel implements IEventProps {
     dateHourEnd: Date;
     dateHourCreation: Date;
     eventMaxNbPlaces: number;
+    eventRemainingPlaces?: number;
     eventPitureId: number;
     picture?: MediaModel;
     statusId: number;
+    status?: StatusModel;
     creatorId: string;
     zoneId: number;
     zone?: ZoneModel;
@@ -40,6 +45,7 @@ export class EventModel implements IEventProps {
         this.dateHourEnd = properties.dateHourEnd;
         this.dateHourCreation = properties.dateHourCreation;
         this.eventMaxNbPlaces = properties.eventMaxNbPlaces;
+        this.eventRemainingPlaces = properties.eventRemainingPlaces;
         this.eventPitureId = properties.eventPitureId;
         this.picture = properties.picture;
         this.statusId = properties.statusId;
