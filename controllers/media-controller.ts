@@ -33,25 +33,6 @@ export class MediaController {
         return new LogError({numError: 404, text: "Media not found"});
     }
 
-    async getMediaByZoneId(zoneId: number): Promise<MediaModel[]> {
-        const res = await this.connection.query(`SELECT MEDIA.media_id, media_path
-                                                 FROM MEDIA
-                                                          JOIN HAVE_ZONE_PICTURES HZP ON MEDIA.media_id = HZP.media_id
-                                                 where HZP.zone_id = ?`, [
-            zoneId
-        ]);
-        const data = res[0];
-        if (Array.isArray(data)) {
-            return (data as RowDataPacket[]).map(function (row: any) {
-                return new MediaModel({
-                    mediaId: row["media_id"],
-                    mediaPath: row["media_path"]
-                });
-            });
-        }
-        return [];
-    }
-
     async getMaxMediaId(): Promise<number> {
         const res = await this.connection.query('SELECT MAX(media_id) as maxId FROM MEDIA');
         const data = res[0];

@@ -319,31 +319,6 @@ zoneRouter.put("/refuse/:id", authUserMiddleWare, async function (req, res, next
 });
 
 /**
- * récupérer les images d'une zone par id
- * URL : /zone/get-pictures/:zoneId
- * Requete : GET
- * ACCES : TOUS
- * Nécessite d'être connecté : OUI
- */
-zoneRouter.get("/get-pictures/:zoneId", authUserMiddleWare, async function (req, res, next) {
-    try {
-        const connection = await DatabaseUtils.getConnection();
-        const mediaService = new MediaServiceImpl(connection);
-
-        const id = req.params.zoneId;
-
-        if (id === undefined)
-            return res.status(400).end("Veuillez renseigner les informations nécessaires");
-
-        const pictures = await mediaService.getMediaByZoneId(Number.parseInt(id));
-
-        res.json(pictures);
-    } catch (err) {
-        next(err);
-    }
-});
-
-/**
  * ajout d'une image dans une zone
  * URL : /zone/add-picture
  * Requete : POST
@@ -417,23 +392,23 @@ zoneRouter.delete("/delete-picture", authUserMiddleWare, async function (req, re
 });
 
 /**
- * récupération des images d'une zone selon son id
- * URL : /zone/get-pictures/:id
+ * récupération les images d'une zone selon son id
+ * URL : /zone/get-pictures/:zoneId
  * Requete : GET
  * ACCES : TOUS
  * Nécessite d'être connecté : OUI
  */
-zoneRouter.get("/get-pictures/:id", authUserMiddleWare, async function (req, res, next) {
+zoneRouter.get("/get-pictures/:zoneId", authUserMiddleWare, async function (req, res, next) {
     try {
         const connection = await DatabaseUtils.getConnection();
         const zoneService = new ZoneServiceImpl(connection);
 
-        const id = req.params.id;
+        const zoneId = req.params.zoneId;
 
-        if (id === undefined)
+        if (zoneId === undefined)
             return res.status(400).end("Veuillez renseigner les informations nécessaires");
 
-        const pictures = await zoneService.getMediaZonesById(Number.parseInt(id));
+        const pictures = await zoneService.getMediaZonesById(Number.parseInt(zoneId));
 
         if (pictures instanceof LogError)
             LogError.HandleStatus(res, pictures);

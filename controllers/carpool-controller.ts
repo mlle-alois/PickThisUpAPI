@@ -173,15 +173,23 @@ export class CarpoolController {
     }
 
     async getCarpoolsByEvent(eventId: number): Promise<CarpoolModel[]> {
-        const res = await this.connection.query(`SELECT carpool_id,
+        const res = await this.connection.query(`SELECT CARPOOL.carpool_id,
                                                         carpool_departure_street,
                                                         carpool_departure_zipcode,
                                                         carpool_departure_city,
                                                         nb_places,
+                                                        COALESCE(nb_places - COUNT(RUC.carpool_id), 0) as carpool_remaining_places,
                                                         event_id,
-                                                        conductor_id
+                                                        conductor_id,
+                                                        user_password,
+                                                        user_name,
+                                                        user_firstname,
+                                                        user_phone_number
                                                  FROM CARPOOL
-                                                 WHERE event_id = ?`, [
+                                                          JOIN USER ON USER.user_mail = CARPOOL.conductor_id
+                                                          LEFT JOIN RESERVE_USER_CARPOOL RUC ON RUC.carpool_id = CARPOOL.carpool_id
+                                                 WHERE CARPOOL.event_id = ?
+                                                 GROUP BY CARPOOL.carpool_id`, [
             eventId
         ]);
         const data = res[0];
@@ -193,8 +201,16 @@ export class CarpoolController {
                     carpoolDepartureZipcode: row["carpool_departure_zipcode"],
                     carpoolDepartureCity: row["carpool_departure_city"],
                     nbPlaces: row["nb_places"],
+                    carpoolRemainingPlaces: row["carpool_remaining_places"],
                     eventId: row["event_id"],
-                    conductorId: row["conductor_id"]
+                    conductorId: row["conductor_id"],
+                    conductor: new UserModel({
+                        mail: row["conductor_id"],
+                        password: row["user_password"],
+                        name: row["user_name"],
+                        firstname: row["user_firstname"],
+                        phoneNumber: row["user_phone_number"]
+                    })
                 });
             });
         }
@@ -233,8 +249,8 @@ export class CarpoolController {
 
     async getOldAdressesCarpoolByUser(userMail: string): Promise<any> {
         const res = await this.connection.query(`SELECT DISTINCT carpool_departure_street,
-                                                        carpool_departure_zipcode,
-                                                        carpool_departure_city
+                                                                 carpool_departure_zipcode,
+                                                                 carpool_departure_city
                                                  FROM CARPOOL
                                                  WHERE conductor_id = ?`, [
             userMail

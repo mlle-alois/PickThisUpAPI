@@ -6,8 +6,6 @@ export interface MediaService {
 
     getMediaById(mediaId: number): Promise<MediaModel | LogError>;
 
-    getMediaByZoneId(zoneId: number): Promise<MediaModel[]>;
-
     getMaxMediaId(): Promise<number>;
 
     deleteMedia(mediaId: number): Promise<boolean>;

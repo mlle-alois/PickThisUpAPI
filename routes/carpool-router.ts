@@ -232,6 +232,30 @@ carpoolRouter.get("/getByEvent/:id", authUserMiddleWare, async function (req, re
 });
 
 /**
+ * récupérer les participants d'un covoiturage selon son id
+ * URL : /carpool/getParticipants/:id
+ * Requete : GET
+ * ACCES : TOUS
+ * Nécessite d'être connecté : OUI
+ */
+carpoolRouter.get("/getParticipants/:id", authUserMiddleWare, async function (req, res, next) {
+    const connection = await DatabaseUtils.getConnection();
+    const carpoolService = new CarpoolServiceImpl(connection);
+
+    const id = req.params.id;
+
+    if (id === undefined)
+        return res.status(400).end("Veuillez renseigner les informations nécessaires");
+
+    const participants = await carpoolService.getCarpoolMembersById(Number.parseInt(id));
+
+    if (participants instanceof LogError)
+        LogError.HandleStatus(res, participants);
+    else
+        res.json(participants);
+});
+
+/**
  * récupérer les précédentes adresses de covoiturages de l'utilisateur connecté
  * URL : /carpool/getOldAdresses
  * Requete : GET

@@ -30,14 +30,6 @@ export class MediaServiceImpl implements MediaService {
     }
 
     /**
-     * Récupération des médias d'une zone
-     * @param zoneId
-     */
-    getMediaByZoneId(zoneId: number): Promise<MediaModel[]> {
-        return this.mediaController.getMediaByZoneId(zoneId);
-    }
-
-    /**
      * Récupération de l'id de media maximum existant
      */
     async getMaxMediaId(): Promise<number> {
