@@ -4,6 +4,7 @@ export * from './carpool-service';
 export * from './event-service';
 export * from './list-service';
 export * from './media-service';
+export * from './pollution-level-service';
 export * from './priority-service';
 export * from './session-service';
 export * from './status-service';

@@ -6,6 +6,7 @@ export interface IZoneProps {
     zoneDescription: string;
     signalmanId: string;
     statusId: number;
+    pollutionLevelId: number;
 }
 
 export class ZoneModel implements IZoneProps {
@@ -16,6 +17,7 @@ export class ZoneModel implements IZoneProps {
     zoneDescription: string;
     signalmanId: string;
     statusId: number;
+    pollutionLevelId: number;
 
     constructor(properties: IZoneProps) {
         this.zoneId = properties.zoneId;
@@ -25,5 +27,6 @@ export class ZoneModel implements IZoneProps {
         this.zoneDescription = properties.zoneDescription;
         this.signalmanId = properties.signalmanId;
         this.statusId = properties.statusId;
+        this.pollutionLevelId = properties.pollutionLevelId;
     }
 }

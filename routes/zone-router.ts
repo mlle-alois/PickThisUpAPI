@@ -32,8 +32,9 @@ zoneRouter.post("/add", authUserMiddleWare, async function (req, res, next) {
             const zipcode = req.body.zipcode;
             const city = req.body.city;
             const description = req.body.description;
+            const pollutionLevel = req.body.pollutionLevel;
 
-            if (street === undefined || zipcode === undefined || city === undefined || description === undefined) {
+            if (street === undefined || zipcode === undefined || city === undefined || description === undefined ||pollutionLevel === undefined) {
                 res.status(400).end("Veuillez renseigner les informations nécessaires");
                 return;
             }
@@ -51,7 +52,8 @@ zoneRouter.post("/add", authUserMiddleWare, async function (req, res, next) {
                 zoneCity: city,
                 zoneDescription: description,
                 signalmanId: signalmanId,
-                statusId: statusId
+                statusId: statusId,
+                pollutionLevelId: pollutionLevel
             });
 
             if (zone instanceof LogError) {
@@ -139,8 +141,9 @@ zoneRouter.put("/update/:id", authUserMiddleWare, async function (req, res, next
             const zipcode = req.body.zipcode;
             const city = req.body.city;
             const description = req.body.description;
+            const pollutionLevelId = req.body.pollutionLevel;
 
-            if (id === undefined || (street === undefined && zipcode === undefined && city === undefined && description === undefined)) {
+            if (id === undefined || (street === undefined && zipcode === undefined && city === undefined && description === undefined && pollutionLevelId === undefined)) {
                 res.status(400).end("Veuillez renseigner les informations nécessaires");
                 return;
             }
@@ -152,7 +155,8 @@ zoneRouter.put("/update/:id", authUserMiddleWare, async function (req, res, next
                 zoneStreet: street,
                 zoneZipcode: zipcode,
                 zoneCity: city,
-                zoneDescription: description
+                zoneDescription: description,
+                pollutionLevelId: pollutionLevelId
             });
 
             if (zone instanceof LogError)

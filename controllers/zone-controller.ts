@@ -1,6 +1,5 @@
-import {ZoneModel, LogError, UserModel, MediaModel} from "../models";
+import {LogError, MediaModel, ZoneModel} from "../models";
 import {Connection, ResultSetHeader, RowDataPacket} from "mysql2/promise";
-import {DateUtils} from "../Utils";
 import {MediaServiceImpl} from "../services/impl/media-service-impl";
 
 export interface ZoneGetAllOptions {
@@ -14,6 +13,7 @@ export interface ZoneUpdateOptions {
     zoneZipcode: number;
     zoneCity: string;
     zoneDescription: string;
+    pollutionLevelId: number;
 }
 
 export class ZoneController {
@@ -36,11 +36,11 @@ export class ZoneController {
                                                         zone_city,
                                                         zone_description,
                                                         signalman_id,
-                                                        status_id
+                                                        status_id,
+                                                        pollution_level_id
                                                  FROM ZONE
                                                  WHERE status_id = 4
-                                                 OR (status_id = 5 AND signalman_id = ?)
-                                                 LIMIT ?, ?`, [
+                                                    OR (status_id = 5 AND signalman_id = ?) LIMIT ?, ?`, [
             userMail, offset, limit
         ]);
         const data = res[0];
@@ -53,7 +53,8 @@ export class ZoneController {
                     zoneCity: row["zone_city"],
                     zoneDescription: row["zone_description"],
                     signalmanId: row["signalman_id"],
-                    statusId: row["status_id"]
+                    statusId: row["status_id"],
+                    pollutionLevelId: row["pollution_level_id"],
                 });
             });
         }
@@ -67,7 +68,8 @@ export class ZoneController {
                                                         zone_city,
                                                         zone_description,
                                                         signalman_id,
-                                                        status_id
+                                                        status_id,
+                                                        pollution_level_id
                                                  FROM ZONE
                                                  where zone_id = ?`, [
             zoneId
@@ -84,7 +86,8 @@ export class ZoneController {
                     zoneCity: row["zone_city"],
                     zoneDescription: row["zone_description"],
                     signalmanId: row["signalman_id"],
-                    statusId: row["status_id"]
+                    statusId: row["status_id"],
+                    pollutionLevelId: row["pollution_level_id"]
                 });
             }
         }
@@ -169,6 +172,10 @@ export class ZoneController {
             setClause.push("zone_description = ?");
             params.push(options.zoneDescription);
         }
+        if (options.pollutionLevelId !== undefined) {
+            setClause.push("pollution_level_id = ?");
+            params.push(options.pollutionLevelId);
+        }
         params.push(options.zoneId);
         try {
             const res = await this.connection.execute(`UPDATE ZONE SET ${setClause.join(", ")} WHERE zone_id = ?`, params);
@@ -190,7 +197,8 @@ export class ZoneController {
                                                         zone_city,
                                                         zone_description,
                                                         signalman_id,
-                                                        status_id
+                                                        status_id,
+                                                        pollution_level_id
                                                  FROM ZONE
                                                  WHERE signalman_id = ?`, [
             userMail
@@ -205,7 +213,8 @@ export class ZoneController {
                     zoneCity: row["zone_city"],
                     zoneDescription: row["zone_description"],
                     signalmanId: row["signalman_id"],
-                    statusId: row["status_id"]
+                    statusId: row["status_id"],
+                    pollutionLevelId: row["pollution_level_id"]
                 });
             });
         }
@@ -219,10 +228,11 @@ export class ZoneController {
                                                         zone_city,
                                                         zone_description,
                                                         signalman_id,
-                                                        status_id
+                                                        status_id,
+                                                        pollution_level_id
                                                  FROM ZONE
                                                  WHERE signalman_id = ?
-                                                 AND status_id = ?`, [
+                                                   AND status_id = ?`, [
             userMail, statusId
         ]);
         const data = res[0];
@@ -235,7 +245,8 @@ export class ZoneController {
                     zoneCity: row["zone_city"],
                     zoneDescription: row["zone_description"],
                     signalmanId: row["signalman_id"],
-                    statusId: row["status_id"]
+                    statusId: row["status_id"],
+                    pollutionLevelId: row["pollution_level_id"]
                 });
             });
         }
@@ -297,7 +308,7 @@ export class ZoneController {
             const res = await this.connection.query(`DELETE
                                                      FROM HAVE_ZONE_PICTURES
                                                      WHERE media_id = ?
-                                                     AND zone_id = ?`, [
+                                                       AND zone_id = ?`, [
                 mediaId, zoneId
             ]);
             const headers = res[0] as ResultSetHeader;

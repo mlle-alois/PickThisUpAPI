@@ -9,6 +9,7 @@ import {ZoneService} from "../zone-service";
 import {UserServiceImpl} from "./user-service-impl";
 import {StatusServiceImpl} from "./status-service-impl";
 import {MediaServiceImpl} from "./media-service-impl";
+import {PollutionLevelServiceImpl} from "./pollution-level-service-impl";
 
 /**
  * Zone = Signalement
@@ -20,6 +21,7 @@ export class ZoneServiceImpl implements ZoneService {
     private userService: UserServiceImpl;
     private statusService: StatusServiceImpl;
     private mediaService: MediaServiceImpl;
+    private pollutionLevelService: PollutionLevelServiceImpl;
 
     constructor(connection: Connection) {
         this.connection = connection;
@@ -27,6 +29,7 @@ export class ZoneServiceImpl implements ZoneService {
         this.userService = new UserServiceImpl(this.connection);
         this.statusService = new StatusServiceImpl(this.connection);
         this.mediaService = new MediaServiceImpl(this.connection);
+        this.pollutionLevelService = new PollutionLevelServiceImpl(this.connection);
     }
 
     /**
@@ -72,6 +75,10 @@ export class ZoneServiceImpl implements ZoneService {
         if (status instanceof LogError)
             return new LogError({numError: 404, text: "Status don't exists"});
 
+        const pollutionLevel = await this.pollutionLevelService.getPollutionLevelById(options.pollutionLevelId);
+        if (pollutionLevel instanceof LogError)
+            return new LogError({numError: 404, text: "Pollution level don't exists"});
+
         return this.zoneController.createZone(options);
     }
 
@@ -92,6 +99,10 @@ export class ZoneServiceImpl implements ZoneService {
      * @param options
      */
     async updateZone(options: ZoneUpdateOptions): Promise<ZoneModel | LogError> {
+        const pollutionLevel = await this.pollutionLevelService.getPollutionLevelById(options.pollutionLevelId);
+        if (pollutionLevel instanceof LogError)
+            return new LogError({numError: 404, text: "Pollution level don't exists"});
+
         return await this.zoneController.updateZone(options);
     }
 

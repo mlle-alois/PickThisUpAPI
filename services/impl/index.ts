@@ -3,6 +3,8 @@ export * from './board-service-impl';
 export * from './carpool-service-impl';
 export * from './event-service-impl';
 export * from './list-service-impl';
+export * from './media-service-impl';
+export * from './pollution-level-service-impl';
 export * from './priority-service-impl';
 export * from './session-service-impl';
 export * from './status-service-impl';

@@ -4,6 +4,7 @@ export * from './carpool-controller';
 export * from './event-controller';
 export * from './list-controller';
 export * from './media-controller';
+export * from './pollution-level-controller';
 export * from './priority-controller';
 export * from './session-controller';
 export * from './status-controller';
