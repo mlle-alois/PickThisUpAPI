@@ -119,15 +119,17 @@ export class ZoneController {
                                                              zone_city,
                                                              zone_description,
                                                              signalman_id,
-                                                             status_id)
-                                           VALUES (?, ?, ?, ?, ?, ?, ?)`, [
+                                                             status_id,
+                                                             pollution_level_id)
+                                           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, [
                 options.zoneId,
                 options.zoneStreet,
                 options.zoneZipcode,
                 options.zoneCity,
                 options.zoneDescription,
                 options.signalmanId,
-                options.statusId
+                options.statusId,
+                options.pollutionLevelId
             ]);
 
             return await this.getZoneById(options.zoneId);

@@ -1,16 +1,11 @@
 import express from "express";
 import {DatabaseUtils} from "../database/database";
 import {authUserMiddleWare} from "../middlewares/auth-middleware";
-import {
-    getUserMailConnected,
-    isAdministratorConnected,
-    isBlockedUserConnected,
-    isDevConnected
-} from "../Utils";
+import {getUserMailConnected, isAdministratorConnected, isBlockedUserConnected, isDevConnected} from "../Utils";
 import {ZoneServiceImpl} from "../services/impl";
 import {LogError} from "../models";
-import {REFUSED_STATUS, VALIDATED_STATUS} from "../consts";
-import {MediaServiceImpl} from "../services/impl/media-service-impl";
+import {ON_ATTEMPT_STATUS, VALIDATED_STATUS} from "../consts";
+import {MediaServiceImpl} from "../services/impl";
 
 const zoneRouter = express.Router();
 
@@ -43,7 +38,7 @@ zoneRouter.post("/add", authUserMiddleWare, async function (req, res, next) {
             if (signalmanId instanceof LogError)
                 return LogError.HandleStatus(res, signalmanId);
 
-            const statusId = await isAdministratorConnected(req) ? VALIDATED_STATUS : REFUSED_STATUS;
+            const statusId = await isAdministratorConnected(req) ? VALIDATED_STATUS : ON_ATTEMPT_STATUS;
 
             const zone = await zoneService.createZone({
                 zoneId: id,
@@ -59,8 +54,8 @@ zoneRouter.post("/add", authUserMiddleWare, async function (req, res, next) {
             if (zone instanceof LogError) {
                 LogError.HandleStatus(res, zone);
             } else {
-                res.status(201);
                 res.json(zone);
+                res.status(201).end();
             }
         }
         res.status(403).end();
@@ -336,7 +331,6 @@ zoneRouter.post("/add-picture", authUserMiddleWare, async function (req, res, ne
             const zoneService = new ZoneServiceImpl(connection);
             const mediaService = new MediaServiceImpl(connection);
 
-            const mediaId = await mediaService.getMaxMediaId() + 1;
             const zoneId = req.body.zoneId;
             const path = req.body.path;
 
@@ -346,7 +340,7 @@ zoneRouter.post("/add-picture", authUserMiddleWare, async function (req, res, ne
             }
 
             const media = await zoneService.addMediaToZone({
-                mediaId: mediaId,
+                mediaId: 0,
                 mediaPath: path
             }, Number.parseInt(zoneId as string));
 

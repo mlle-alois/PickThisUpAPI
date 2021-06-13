@@ -49,7 +49,8 @@ export class EventController {
                                                         zone_zipcode,
                                                         zone_city,
                                                         ZONE.status_id                                         as zone_status_id,
-                                                        signalman_id
+                                                        signalman_id,
+                                                        pollution_level_id
                                                  FROM EVENT
                                                           JOIN ZONE ON ZONE.zone_id = EVENT.zone_id
                                                           LEFT JOIN MEDIA ON EVENT.event_picture_id = MEDIA.media_id
@@ -86,7 +87,8 @@ export class EventController {
                         zoneZipcode: row["zone_zipcode"],
                         zoneCity: row["zone_city"],
                         statusId: row["zone_status_id"],
-                        signalmanId: row["signalman_id"]
+                        signalmanId: row["signalman_id"],
+                        pollutionLevelId: row["pollution_level_id"]
                     })
                 });
             });

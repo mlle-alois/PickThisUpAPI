@@ -10,7 +10,7 @@ import {
 } from "../Utils";
 import {EventServiceImpl} from "../services/impl";
 import {LogError} from "../models";
-import {REFUSED_STATUS, VALIDATED_STATUS} from "../consts";
+import {ON_ATTEMPT_STATUS, REFUSED_STATUS, VALIDATED_STATUS} from "../consts";
 
 const eventRouter = express.Router();
 
@@ -49,7 +49,7 @@ eventRouter.post("/add", authUserMiddleWare, async function (req, res, next) {
         if (creatorId instanceof LogError)
             return LogError.HandleStatus(res, creatorId);
 
-        const statusId = await isAdministratorConnected(req) ? VALIDATED_STATUS : REFUSED_STATUS;
+        const statusId = await isAdministratorConnected(req) ? VALIDATED_STATUS : ON_ATTEMPT_STATUS;
 
         const event = await eventService.createEvent({
             eventId: id,

@@ -14,10 +14,10 @@ export class PollutionLevelController {
      * @param pollutionLevelId
      */
     async getPollutionLevelById(pollutionLevelId: number): Promise<PollutionLevelModel | LogError> {
-        const res = await this.connection.query(`SELECT user_type_id,
-                                                        user_type_libelle
+        const res = await this.connection.query(`SELECT pollution_level_id,
+                                                        pollution_level_libelle
                                                  FROM POLLUTION_LEVEL
-                                                 where user_type_id = ?`, [
+                                                 where pollution_level_id = ?`, [
             pollutionLevelId
         ]);
         const data = res[0];
@@ -26,8 +26,8 @@ export class PollutionLevelController {
             if (rows.length > 0) {
                 const row = rows[0];
                 return new PollutionLevelModel({
-                    pollutionLevelId: row["user_type_id"],
-                    pollutionLevelLibelle: row["user_type_libelle"]
+                    pollutionLevelId: row["pollution_level_id"],
+                    pollutionLevelLibelle: row["pollution_level_libelle"]
                 });
             }
         }

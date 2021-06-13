@@ -52,13 +52,15 @@ export class MediaController {
 
     async createMedia(options: MediaModel): Promise<MediaModel | LogError> {
         try {
-            await this.connection.execute(`INSERT INTO MEDIA (media_id, media_path)
-                                           VALUES (?, ?)`, [
-                options.mediaId,
+            const res = await this.connection.execute(`INSERT INTO MEDIA (media_path)
+                                           VALUES (?)`, [
                 options.mediaPath
             ]);
-
-            return await this.getMediaById(options.mediaId);
+            const headers = res[0] as ResultSetHeader;
+            if(headers.affectedRows > 0) {
+                return await this.getMediaById(headers.insertId);
+            }
+            return new LogError({numError: 500, text: "Error during media creation"});
         } catch (err) {
             console.error(err);
             return new LogError({numError: 500, text: "Error during media creation"});
