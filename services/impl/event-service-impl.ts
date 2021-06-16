@@ -10,6 +10,7 @@ import {UserServiceImpl} from "./user-service-impl";
 import {StatusServiceImpl} from "./status-service-impl";
 import {MediaServiceImpl} from "./media-service-impl";
 import {ZoneServiceImpl} from "./zone-service-impl";
+import {CarpoolServiceImpl} from "./carpool-service-impl";
 
 export class EventServiceImpl implements EventService {
 
@@ -136,7 +137,12 @@ export class EventServiceImpl implements EventService {
         const participants = await this.eventController.unregisterEvent(eventId, userMail);
         if(participants instanceof LogError)
             return participants;
-        return
+
+        const success = await this.eventController.deleteEventCarpoolsOfUser(eventId, userMail);
+        if(success instanceof LogError)
+            return success;
+
+        return participants;
     }
 
     /**

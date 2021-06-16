@@ -456,4 +456,20 @@ export class EventController {
         }
         return [];
     }
+
+    async deleteEventCarpoolsOfUser(eventId: number, userMail: string): Promise<boolean | LogError> {
+        try {
+            await this.connection.execute(`DELETE
+                                           FROM CARPOOL
+                                           WHERE conductor_id = ?
+                                             AND event_id = ?`, [
+                userMail, eventId
+            ]);
+
+            return true;
+        } catch (err) {
+            console.error(err);
+            return new LogError({numError: 500, text: "Error during deletion of user's carpools"});
+        }
+    }
 }
