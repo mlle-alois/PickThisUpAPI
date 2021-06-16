@@ -42,7 +42,7 @@ export class ZoneServiceImpl implements ZoneService {
     async getAllAvailableZones(userMail: string, options?: ZoneGetAllOptions): Promise<ZoneModel[] | LogError> {
         const user = await this.userService.getUserByMail(userMail);
         if (user instanceof LogError)
-            return new LogError({numError: 404, text: "User don't exists"});
+            return user;
 
         return this.zoneController.getAllAvailableZones(userMail, options);
     }
@@ -69,15 +69,15 @@ export class ZoneServiceImpl implements ZoneService {
     async createZone(options: ZoneModel): Promise<ZoneModel | LogError> {
         const signalman = await this.userService.getUserByMail(options.signalmanId);
         if (signalman instanceof LogError)
-            return new LogError({numError: 404, text: "User don't exists"});
+            return signalman;
 
         const status = await this.statusService.getStatusById(options.statusId);
         if (status instanceof LogError)
-            return new LogError({numError: 404, text: "Status don't exists"});
+            return status;
 
         const pollutionLevel = await this.pollutionLevelService.getPollutionLevelById(options.pollutionLevelId);
         if (pollutionLevel instanceof LogError)
-            return new LogError({numError: 404, text: "Pollution level don't exists"});
+            return pollutionLevel;
 
         return this.zoneController.createZone(options);
     }
@@ -101,7 +101,7 @@ export class ZoneServiceImpl implements ZoneService {
     async updateZone(options: ZoneUpdateOptions): Promise<ZoneModel | LogError> {
         const pollutionLevel = await this.pollutionLevelService.getPollutionLevelById(options.pollutionLevelId);
         if (pollutionLevel instanceof LogError)
-            return new LogError({numError: 404, text: "Pollution level don't exists"});
+            return pollutionLevel;
 
         return await this.zoneController.updateZone(options);
     }
@@ -113,7 +113,7 @@ export class ZoneServiceImpl implements ZoneService {
     async getZonesByUser(userMail: string): Promise<ZoneModel[] | LogError> {
         const user = await this.userService.getUserByMail(userMail);
         if (user instanceof LogError)
-            return new LogError({numError: 404, text: "User don't exists"});
+            return user;
 
         return await this.zoneController.getZonesByUser(userMail);
     }
@@ -126,11 +126,11 @@ export class ZoneServiceImpl implements ZoneService {
     async getZonesByUserAndStatus(userMail: string, statusId: number): Promise<ZoneModel[] | LogError> {
         const user = await this.userService.getUserByMail(userMail);
         if (user instanceof LogError)
-            return new LogError({numError: 404, text: "User don't exists"});
+            return user;
 
         const status = await this.statusService.getStatusById(statusId);
         if (status instanceof LogError)
-            return new LogError({numError: 404, text: "Status don't exists"});
+            return status;
 
         return await this.zoneController.getZonesByUserAndStatus(userMail, statusId);
     }
@@ -142,7 +142,7 @@ export class ZoneServiceImpl implements ZoneService {
     async acceptZone(zoneId: number): Promise<ZoneModel | LogError> {
         const zone = await this.getZoneById(zoneId);
         if (zone instanceof LogError)
-            return new LogError({numError: 404, text: "Zone don't exists"});
+            return zone;
 
         return await this.zoneController.acceptZone(zoneId);
     }
@@ -154,7 +154,7 @@ export class ZoneServiceImpl implements ZoneService {
     async refuseZone(zoneId: number): Promise<ZoneModel | LogError> {
         const zone = await this.getZoneById(zoneId);
         if (zone instanceof LogError)
-            return new LogError({numError: 404, text: "Zone don't exists"});
+            return zone;
 
         return await this.zoneController.refuseZone(zoneId);
     }
@@ -167,7 +167,7 @@ export class ZoneServiceImpl implements ZoneService {
     async addMediaToZone(options: MediaModel, zoneId: number): Promise<MediaModel | LogError> {
         const zone = await this.getZoneById(zoneId);
         if (zone instanceof LogError)
-            return new LogError({numError: 404, text: "Zone don't exists"});
+            return zone;
 
         const media = await this.mediaService.createMedia(options);
         if(media instanceof LogError)
@@ -200,7 +200,7 @@ export class ZoneServiceImpl implements ZoneService {
     async getMediaZonesById(zoneId: number): Promise<MediaModel[] | LogError> {
         const zone = await this.getZoneById(zoneId);
         if (zone instanceof LogError)
-            return new LogError({numError: 404, text: "Zone don't exists"});
+            return zone;
 
         return this.zoneController.getMediaZonesById(zoneId);
     }

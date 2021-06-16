@@ -73,7 +73,7 @@ export class UserServiceImpl implements UserService {
     async updateUser(options: UserUpdateProps): Promise<UserModel | LogError> {
         const user = await this.userController.getUserByMail(options.mail);
         if (user instanceof LogError)
-            return new LogError({numError: 404, text: "User not exists"});
+            return user;
 
         return await this.userController.updateUser(options);
     }

@@ -44,11 +44,11 @@ export class CarpoolServiceImpl implements CarpoolService {
     async createCarpool(options: CarpoolModel): Promise<CarpoolModel | LogError> {
         const event = await this.eventService.getEventById(options.eventId);
         if (event instanceof LogError)
-            return new LogError({numError: 404, text: "Event don't exists"});
+            return event;
 
         const conductor = await this.userService.getUserByMail(options.conductorId);
         if (conductor instanceof LogError)
-            return new LogError({numError: 404, text: "User don't exists"});
+            return conductor;
 
         return this.carpoolController.createCarpool(options);
     }
@@ -81,11 +81,11 @@ export class CarpoolServiceImpl implements CarpoolService {
     async registerCarpool(carpoolId: number, userMail: string): Promise<UserModel[] | LogError> {
         const carpool = await this.getCarpoolById(carpoolId);
         if (carpool instanceof LogError)
-            return new LogError({numError: 404, text: "Carpool don't exists"});
+            return carpool;
 
         const user = await this.userService.getUserByMail(userMail);
         if (user instanceof LogError)
-            return new LogError({numError: 404, text: "User don't exists"});
+            return user;
 
         return await this.carpoolController.registerCarpool(carpoolId, userMail);
     }
@@ -98,11 +98,11 @@ export class CarpoolServiceImpl implements CarpoolService {
     async unregisterCarpool(carpoolId: number, userMail: string): Promise<UserModel[] | LogError> {
         const carpool = await this.getCarpoolById(carpoolId);
         if (carpool instanceof LogError)
-            return new LogError({numError: 404, text: "Carpool don't exists"});
+            return carpool;
 
         const user = await this.userService.getUserByMail(userMail);
         if (user instanceof LogError)
-            return new LogError({numError: 404, text: "User don't exists"});
+            return user;
 
         return await this.carpoolController.unregisterCarpool(carpoolId, userMail);
     }
@@ -114,7 +114,7 @@ export class CarpoolServiceImpl implements CarpoolService {
     async getCarpoolsByEvent(eventId: number): Promise<CarpoolModel[] | LogError> {
         const event = await this.eventService.getEventById(eventId);
         if (event instanceof LogError)
-            return new LogError({numError: 404, text: "Event don't exists"});
+            return event;
 
         return await this.carpoolController.getCarpoolsByEvent(eventId);
     }
@@ -126,7 +126,7 @@ export class CarpoolServiceImpl implements CarpoolService {
     async getCarpoolMembersById(carpoolId: number): Promise<UserModel[] | LogError> {
         const carpool = await this.getCarpoolById(carpoolId);
         if (carpool instanceof LogError)
-            return new LogError({numError: 404, text: "Carpool don't exists"});
+            return carpool;
 
         return await this.carpoolController.getCarpoolMembersById(carpoolId);
     }
@@ -138,7 +138,7 @@ export class CarpoolServiceImpl implements CarpoolService {
     async getOldAdressesCarpoolByUser(userMail: string): Promise<String[] | LogError> {
         const user = await this.userService.getUserByMail(userMail);
         if (user instanceof LogError)
-            return new LogError({numError: 404, text: "User don't exists"});
+            return user;
 
         return await this.carpoolController.getOldAdressesCarpoolByUser(userMail);
     }
