@@ -1,4 +1,4 @@
-import {LogError, MediaModel, ZoneModel} from "../models";
+import {LogError, MediaModel, PollutionLevelModel, ZoneModel} from "../models";
 import {Connection, ResultSetHeader, RowDataPacket} from "mysql2/promise";
 import {MediaServiceImpl} from "../services/impl/media-service-impl";
 
@@ -37,10 +37,14 @@ export class ZoneController {
                                                         zone_description,
                                                         signalman_id,
                                                         status_id,
-                                                        pollution_level_id
+                                                        ZONE.pollution_level_id,
+                                                        pollution_level_libelle
                                                  FROM ZONE
+                                                          JOIN POLLUTION_LEVEL
+                                                               ON POLLUTION_LEVEL.pollution_level_id = ZONE.pollution_level_id
                                                  WHERE status_id = 4
-                                                    OR (status_id = 5 AND signalman_id = ?) LIMIT ?, ?`, [
+                                                    OR (status_id = 5 AND signalman_id = ?)
+                                                 ORDER BY zone_id LIMIT ?, ?`, [
             userMail, offset, limit
         ]);
         const data = res[0];
@@ -55,6 +59,10 @@ export class ZoneController {
                     signalmanId: row["signalman_id"],
                     statusId: row["status_id"],
                     pollutionLevelId: row["pollution_level_id"],
+                    pollutionLevel: new PollutionLevelModel({
+                        pollutionLevelId: row["pollution_level_id"],
+                        pollutionLevelLibelle: row["pollution_level_libelle"]
+                    })
                 });
             });
         }

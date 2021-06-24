@@ -72,9 +72,9 @@ export class TicketServiceImpl implements TicketService {
             if (priority instanceof LogError)
                 return priority;
         }
-        const creator = await this.userService.getUserByMail(options.creatorId);
+        /*const creator = await this.userService.getUserByMail(options.creatorId);
         if (creator instanceof LogError)
-            return creator;
+            return creator;*/
 
         return this.ticketController.createTicket(options);
     }

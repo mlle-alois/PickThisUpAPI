@@ -12,51 +12,45 @@ const ticketRouter = express.Router();
  * ajout d'un ticket
  * URL : /ticket/add
  * Requete : POST
- * ACCES : DEVELOPPEUR
- * Nécessite d'être connecté : OUI
+ * ACCES : TOUT LE MONDe
+ * Nécessite d'être connecté : NON
  */
-ticketRouter.post("/add", authUserMiddleWare, async function (req, res, next) {
+ticketRouter.post("/add", async function (req, res, next) {
     try {
-        if (await isDevConnected(req)) {
-            const connection = await DatabaseUtils.getConnection();
-            const ticketService = new TicketServiceImpl(connection);
+        const connection = await DatabaseUtils.getConnection();
+        const ticketService = new TicketServiceImpl(connection);
 
-            const id = await ticketService.getMaxTicketId() + 1;
-            const name = req.body.name;
-            const description = req.body.description ? req.body.description : null;
-            const closingDate = req.body.closingDate ? req.body.closingDate : null;
-            const statusId = req.body.statusId ? req.body.statusId : 1;
-            const priorityId = req.body.priorityId ? req.body.priorityId : 1;
+        const id = await ticketService.getMaxTicketId() + 1;
+        const name = req.body.name;
+        const description = req.body.description ? req.body.description : null;
+        const closingDate = req.body.closingDate ? req.body.closingDate : null;
+        const statusId = req.body.statusId ? req.body.statusId : 1;
+        const priorityId = req.body.priorityId ? req.body.priorityId : 1;
+        const creator = (req.body.creator && req.body.creator !== "") ? req.body.creator : "no_user";
 
-            if (name === undefined || description === undefined ||
-                closingDate === undefined || statusId === undefined || priorityId === undefined)
-                return res.status(400).end("Veuillez renseigner les informations nécessaires");
+        if (name === undefined || description === undefined ||
+            closingDate === undefined || statusId === undefined || priorityId === undefined || creator === undefined)
+            return res.status(400).end("Veuillez renseigner les informations nécessaires");
 
-            const creatorId = await getUserMailConnected(req);
-            if (creatorId instanceof LogError)
-                return LogError.HandleStatus(res, creatorId);
+        const creationDate = DateUtils.getCurrentDate();
 
-            const creationDate = DateUtils.getCurrentDate();
+        const ticket = await ticketService.createTicket({
+            ticketId: id,
+            ticketName: name,
+            ticketDescription: description,
+            ticketCreationDate: creationDate,
+            ticketClosingDate: closingDate,
+            statusId,
+            priorityId,
+            creatorId: creator
+        })
 
-            const ticket = await ticketService.createTicket({
-                ticketId: id,
-                ticketName: name,
-                ticketDescription: description,
-                ticketCreationDate: creationDate,
-                ticketClosingDate: closingDate,
-                statusId,
-                priorityId,
-                creatorId
-            })
-
-            if (ticket instanceof LogError) {
-                LogError.HandleStatus(res, ticket);
-            } else {
-                res.status(201);
-                res.json(ticket);
-            }
+        if (ticket instanceof LogError) {
+            LogError.HandleStatus(res, ticket);
+        } else {
+            res.status(201);
+            res.json(ticket);
         }
-        res.status(403).end();
     } catch (err) {
         next(err);
     }
