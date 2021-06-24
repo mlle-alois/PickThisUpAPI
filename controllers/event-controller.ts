@@ -274,21 +274,34 @@ export class EventController {
     }
 
     async getPastEventsByUser(userMail: string): Promise<EventModel[]> {
-        const res = await this.connection.query(`SELECT event_id,
+        const res = await this.connection.query(`SELECT EVENT.event_id,
                                                         event_title,
                                                         event_description,
                                                         date_hour_start,
+                                                        date_hour_start > NOW()                                as isFuture,
                                                         date_hour_end,
                                                         date_hour_creation,
                                                         event_max_nb_places,
+                                                        COALESCE(event_max_nb_places - COUNT(PUE.event_id), 0) as event_remaining_places,
                                                         event_picture_id,
-                                                        status_id,
+                                                        coalesce(media_path, "pickThisUpLogo.PNG")             as media_path,
+                                                        EVENT.status_id                                        as event_status_id,
                                                         creator_id,
-                                                        zone_id
+                                                        EVENT.zone_id                                          as zone_id,
+                                                        zone_description,
+                                                        zone_street,
+                                                        zone_zipcode,
+                                                        zone_city,
+                                                        ZONE.status_id                                         as zone_status_id,
+                                                        signalman_id,
+                                                        pollution_level_id
                                                  FROM EVENT
-                                                 WHERE creator_id = ?
+                                                          JOIN ZONE ON ZONE.zone_id = EVENT.zone_id
+                                                          LEFT JOIN MEDIA ON EVENT.event_picture_id = MEDIA.media_id
+                                                          LEFT JOIN PARTICIPATE_USER_EVENT PUE ON EVENT.event_id = PUE.event_id
+                                                 WHERE creator_id = ? 
                                                    AND date_hour_end < NOW()
-                                                 ORDER BY status_id ASC, date_hour_start DESC`, [
+                                                 ORDER BY EVENT.status_id ASC, date_hour_start DESC`, [
             userMail
         ]);
         const data = res[0];
@@ -302,32 +315,100 @@ export class EventController {
                     dateHourEnd: row["date_hour_end"],
                     dateHourCreation: row["date_hour_creation"],
                     eventMaxNbPlaces: row["event_max_nb_places"],
+                    eventRemainingPlaces: row["event_remaining_places"],
                     eventPitureId: row["event_picture_id"],
-                    statusId: row["status_id"],
+                    picture: new MediaModel({
+                        mediaId: row["event_picture_id"],
+                        mediaPath: row["media_path"]
+                    }),
+                    statusId: row["event_status_id"],
                     creatorId: row["creator_id"],
-                    zoneId: row["zone_id"]
+                    zoneId: row["zone_id"],
+                    zone: new ZoneModel({
+                        zoneId: row["zone_id"],
+                        zoneDescription: row["zone_description"],
+                        zoneStreet: row["zone_street"],
+                        zoneZipcode: row["zone_zipcode"],
+                        zoneCity: row["zone_city"],
+                        statusId: row["zone_status_id"],
+                        signalmanId: row["signalman_id"],
+                        pollutionLevelId: row["pollution_level_id"]
+                    })
                 });
             });
         }
         return [];
     }
+
+    /*  async getPastEventsByUser(userMail: string): Promise<EventModel[]> {
+          const res = await this.connection.query(`SELECT event_id,
+                                                          event_title,
+                                                          event_description,
+                                                          date_hour_start,
+                                                          date_hour_end,
+                                                          date_hour_creation,
+                                                          event_max_nb_places,
+                                                          event_picture_id,
+                                                          status_id,
+                                                          creator_id,
+                                                          zone_id
+                                                   FROM EVENT
+                                                   WHERE creator_id = ?
+                                                     AND date_hour_end < NOW()
+                                                   ORDER BY status_id ASC, date_hour_start DESC`, [
+              userMail
+          ]);
+          const data = res[0];
+          if (Array.isArray(data)) {
+              return (data as RowDataPacket[]).map(function (row: any) {
+                  return new EventModel({
+                      eventId: row["event_id"],
+                      eventTitle: row["event_title"],
+                      eventDescription: row["event_description"],
+                      dateHourStart: row["date_hour_start"],
+                      dateHourEnd: row["date_hour_end"],
+                      dateHourCreation: row["date_hour_creation"],
+                      eventMaxNbPlaces: row["event_max_nb_places"],
+                      eventPitureId: row["event_picture_id"],
+                      statusId: row["status_id"],
+                      creatorId: row["creator_id"],
+                      zoneId: row["zone_id"]
+                  });
+              });
+          }
+          return [];
+      }*/
 
     async getFutureEventsByUser(userMail: string): Promise<EventModel[]> {
-        const res = await this.connection.query(`SELECT event_id,
+        const res = await this.connection.query(`SELECT EVENT.event_id,
                                                         event_title,
                                                         event_description,
                                                         date_hour_start,
+                                                        date_hour_start > NOW()                                as isFuture,
                                                         date_hour_end,
                                                         date_hour_creation,
                                                         event_max_nb_places,
+                                                        COALESCE(event_max_nb_places - COUNT(PUE.event_id), 0) as event_remaining_places,
                                                         event_picture_id,
-                                                        status_id,
+                                                        coalesce(media_path, "pickThisUpLogo.PNG")             as media_path,
+                                                        EVENT.status_id                                        as event_status_id,
                                                         creator_id,
-                                                        zone_id
+                                                        EVENT.zone_id                                          as zone_id,
+                                                        zone_description,
+                                                        zone_street,
+                                                        zone_zipcode,
+                                                        zone_city,
+                                                        ZONE.status_id                                         as zone_status_id,
+                                                        signalman_id,
+                                                        pollution_level_id
                                                  FROM EVENT
-                                                 WHERE creator_id = ?
+                                                          JOIN ZONE ON ZONE.zone_id = EVENT.zone_id
+                                                          LEFT JOIN MEDIA ON EVENT.event_picture_id = MEDIA.media_id
+                                                          LEFT JOIN PARTICIPATE_USER_EVENT PUE ON EVENT.event_id = PUE.event_id
+                                                 WHERE ( creator_id OR user_id = ? )
                                                    AND date_hour_start > NOW()
-                                                 ORDER BY status_id ASC, date_hour_start DESC`, [
+                                                   AND EVENT.event_id IS NOT NULL
+                                                 ORDER BY EVENT.status_id ASC, date_hour_start DESC`, [
             userMail
         ]);
         const data = res[0];
@@ -341,33 +422,62 @@ export class EventController {
                     dateHourEnd: row["date_hour_end"],
                     dateHourCreation: row["date_hour_creation"],
                     eventMaxNbPlaces: row["event_max_nb_places"],
+                    eventRemainingPlaces: row["event_remaining_places"],
                     eventPitureId: row["event_picture_id"],
-                    statusId: row["status_id"],
+                    picture: new MediaModel({
+                        mediaId: row["event_picture_id"],
+                        mediaPath: row["media_path"]
+                    }),
+                    statusId: row["event_status_id"],
                     creatorId: row["creator_id"],
-                    zoneId: row["zone_id"]
+                    zoneId: row["zone_id"],
+                    zone: new ZoneModel({
+                        zoneId: row["zone_id"],
+                        zoneDescription: row["zone_description"],
+                        zoneStreet: row["zone_street"],
+                        zoneZipcode: row["zone_zipcode"],
+                        zoneCity: row["zone_city"],
+                        statusId: row["zone_status_id"],
+                        signalmanId: row["signalman_id"],
+                        pollutionLevelId: row["pollution_level_id"]
+                    })
                 });
             });
         }
         return [];
     }
 
+
     async getActualEventsByUser(userMail: string): Promise<EventModel[]> {
-        const res = await this.connection.query(`SELECT event_id,
+        const res = await this.connection.query(`SELECT EVENT.event_id,
                                                         event_title,
                                                         event_description,
                                                         date_hour_start,
+                                                        date_hour_start > NOW()                                as isFuture,
                                                         date_hour_end,
                                                         date_hour_creation,
                                                         event_max_nb_places,
+                                                        COALESCE(event_max_nb_places - COUNT(PUE.event_id), 0) as event_remaining_places,
                                                         event_picture_id,
-                                                        status_id,
+                                                        coalesce(media_path, "pickThisUpLogo.PNG")             as media_path,
+                                                        EVENT.status_id                                        as event_status_id,
                                                         creator_id,
-                                                        zone_id
+                                                        EVENT.zone_id                                          as zone_id,
+                                                        zone_description,
+                                                        zone_street,
+                                                        zone_zipcode,
+                                                        zone_city,
+                                                        ZONE.status_id                                         as zone_status_id,
+                                                        signalman_id,
+                                                        pollution_level_id
                                                  FROM EVENT
-                                                 WHERE creator_id = ?
-                                                   AND date_hour_start < NOW()
-                                                   AND date_hour_end > NOW()
-                                                 ORDER BY status_id ASC, date_hour_start DESC`, [
+                                                          JOIN ZONE ON ZONE.zone_id = EVENT.zone_id
+                                                          LEFT JOIN MEDIA ON EVENT.event_picture_id = MEDIA.media_id
+                                                          LEFT JOIN PARTICIPATE_USER_EVENT PUE ON EVENT.event_id = PUE.event_id
+                                                    WHERE ( creator_id OR user_id = ? )
+                                                      AND date_hour_start < NOW()
+                                                      AND date_hour_end > NOW()
+                                                    ORDER BY EVENT.status_id ASC, date_hour_start DESC`, [
             userMail
         ]);
         const data = res[0];
@@ -381,15 +491,31 @@ export class EventController {
                     dateHourEnd: row["date_hour_end"],
                     dateHourCreation: row["date_hour_creation"],
                     eventMaxNbPlaces: row["event_max_nb_places"],
+                    eventRemainingPlaces: row["event_remaining_places"],
                     eventPitureId: row["event_picture_id"],
-                    statusId: row["status_id"],
+                    picture: new MediaModel({
+                        mediaId: row["event_picture_id"],
+                        mediaPath: row["media_path"]
+                    }),
+                    statusId: row["event_status_id"],
                     creatorId: row["creator_id"],
-                    zoneId: row["zone_id"]
+                    zoneId: row["zone_id"],
+                    zone: new ZoneModel({
+                        zoneId: row["zone_id"],
+                        zoneDescription: row["zone_description"],
+                        zoneStreet: row["zone_street"],
+                        zoneZipcode: row["zone_zipcode"],
+                        zoneCity: row["zone_city"],
+                        statusId: row["zone_status_id"],
+                        signalmanId: row["signalman_id"],
+                        pollutionLevelId: row["pollution_level_id"]
+                    })
                 });
             });
         }
         return [];
     }
+
 
     async acceptEvent(eventId: number): Promise<EventModel | LogError> {
         try {
