@@ -44,6 +44,7 @@ export class ZoneController {
                                                                ON POLLUTION_LEVEL.pollution_level_id = ZONE.pollution_level_id
                                                  WHERE status_id = 4
                                                     OR (status_id = 5 AND signalman_id = ?)
+                                                     AND zone_id NOT IN (SELECT zone_id FROM EVENT)
                                                  ORDER BY zone_id LIMIT ?, ?`, [
             userMail, offset, limit
         ]);
