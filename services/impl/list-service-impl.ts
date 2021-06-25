@@ -46,7 +46,7 @@ export class ListServiceImpl implements ListService {
     async createList(options: ListModel): Promise<ListModel | LogError> {
         const board = await this.boardService.getBoardById(options.boardId);
         if (board instanceof LogError)
-            return new LogError({numError: 404, text: "Board not exists"});
+            return board;
 
         return this.listController.createList(options);
     }
@@ -74,12 +74,12 @@ export class ListServiceImpl implements ListService {
     async updateList(options: ListUpdateProps): Promise<ListModel | LogError> {
         const list = await this.listController.getListById(options.listId);
         if (list instanceof LogError)
-            return new LogError({numError: 404, text: "List not exists"});
+            return list;
 
         if (options.boardId !== undefined && list.boardId !== options.boardId) {
             const board = await this.boardService.getBoardById(options.boardId);
             if (board instanceof LogError)
-                return new LogError({numError: 404, text: "Board not exists"});
+                return board;
 
             const positionInBoard = await this.getMaxPositionInBoardById(options.boardId);
             if (positionInBoard instanceof LogError)
@@ -120,7 +120,7 @@ export class ListServiceImpl implements ListService {
     async getMaxPositionInBoardById(boardId: number): Promise<number | LogError> {
         const board = await this.boardService.getBoardById(boardId);
         if (board instanceof LogError)
-            return new LogError({numError: 404, text: "Board not exists"});
+            return board;
 
         return await this.listController.getMaxPositionInBoardById(boardId);
     }

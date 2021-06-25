@@ -1,4 +1,4 @@
-import {LogError, UserModel} from "../models";
+import {LogError, MediaModel, UserModel, UserTypeModel} from "../models";
 import {Connection, ResultSetHeader, RowDataPacket} from "mysql2/promise";
 import {compare, hash} from 'bcrypt';
 import {TaskGetAllOptions} from "./task-controller";
@@ -40,8 +40,12 @@ export class UserController {
                                                         user_firstname,
                                                         user_phone_number,
                                                         profile_picture_id,
-                                                        user_type_id
-                                                 FROM USER LIMIT ?, ?`, [
+                                                        media_path,
+                                                        USER_TYPE.user_type_id,
+                                                        user_type_libelle
+                                                 FROM USER
+                                                          LEFT JOIN MEDIA ON MEDIA.media_id = USER.profile_picture_id
+                                                          JOIN USER_TYPE ON USER_TYPE.user_type_id = USER.user_type_id LIMIT ?, ?`, [
             offset,
             limit
         ]);
@@ -55,7 +59,15 @@ export class UserController {
                     name: row["user_name"],
                     phoneNumber: row["user_phone_number"],
                     profilePictureId: row["profile_picture_id"],
-                    typeId: row["user_type_id"]
+                    profilePicture: new MediaModel({
+                        mediaId: row["profile_picture_id"],
+                        mediaPath: row["media_path"]
+                    }),
+                    typeId: row["user_type_id"],
+                    type: new UserTypeModel({
+                        userTypeId: row["user_type_id"],
+                        userTypeLibelle: row["user_type_libelle"]
+                    })
                 });
             });
         }
@@ -74,8 +86,12 @@ export class UserController {
                                                         user_firstname,
                                                         user_phone_number,
                                                         profile_picture_id,
-                                                        user_type_id
+                                                        media_path,
+                                                        USER_TYPE.user_type_id,
+                                                        user_type_libelle
                                                  FROM USER
+                                                          LEFT JOIN MEDIA ON MEDIA.media_id = USER.profile_picture_id
+                                                          JOIN USER_TYPE ON USER_TYPE.user_type_id = USER.user_type_id
                                                  where user_mail = ?`, [
             mail
         ]);
@@ -91,7 +107,15 @@ export class UserController {
                     name: row["user_name"],
                     phoneNumber: row["user_phone_number"],
                     profilePictureId: row["profile_picture_id"],
-                    typeId: row["user_type_id"]
+                    profilePicture: new MediaModel({
+                        mediaId: row["profile_picture_id"],
+                        mediaPath: row["media_path"]
+                    }),
+                    typeId: row["user_type_id"],
+                    type: new UserTypeModel({
+                        userTypeId: row["user_type_id"],
+                        userTypeLibelle: row["user_type_libelle"]
+                    })
                 });
             }
         }
@@ -110,8 +134,12 @@ export class UserController {
                                                         user_firstname,
                                                         user_phone_number,
                                                         profile_picture_id,
-                                                        user_type_id
+                                                        media_path,
+                                                        USER_TYPE.user_type_id,
+                                                        user_type_libelle
                                                  FROM USER
+                                                          LEFT JOIN MEDIA ON MEDIA.media_id = USER.profile_picture_id
+                                                          JOIN USER_TYPE ON USER_TYPE.user_type_id = USER.user_type_id
                                                  where user_mail = ?`, [
             mail
         ]);
@@ -131,7 +159,15 @@ export class UserController {
                     name: row["user_name"],
                     phoneNumber: row["user_phone_number"],
                     profilePictureId: row["profile_picture_id"],
-                    typeId: row["user_type_id"]
+                    profilePicture: new MediaModel({
+                        mediaId: row["profile_picture_id"],
+                        mediaPath: row["media_path"]
+                    }),
+                    typeId: row["user_type_id"],
+                    type: new UserTypeModel({
+                        userTypeId: row["user_type_id"],
+                        userTypeLibelle: row["user_type_libelle"]
+                    })
                 });
             }
         }
@@ -152,8 +188,12 @@ export class UserController {
                                                         user_firstname,
                                                         user_phone_number,
                                                         profile_picture_id,
-                                                        user_type_id
+                                                        media_path,
+                                                        USER_TYPE.user_type_id,
+                                                        user_type_libelle
                                                  FROM USER
+                                                          LEFT JOIN MEDIA ON MEDIA.media_id = USER.profile_picture_id
+                                                          JOIN USER_TYPE ON USER_TYPE.user_type_id = USER.user_type_id
                                                  WHERE user_type_id = 1 LIMIT ?, ?`, [
             offset, limit
         ]);
@@ -167,7 +207,15 @@ export class UserController {
                     name: row["user_name"],
                     phoneNumber: row["user_phone_number"],
                     profilePictureId: row["profile_picture_id"],
-                    typeId: row["user_type_id"]
+                    profilePicture: new MediaModel({
+                        mediaId: row["profile_picture_id"],
+                        mediaPath: row["media_path"]
+                    }),
+                    typeId: row["user_type_id"],
+                    type: new UserTypeModel({
+                        userTypeId: row["user_type_id"],
+                        userTypeLibelle: row["user_type_libelle"]
+                    })
                 });
             });
         }
@@ -185,8 +233,12 @@ export class UserController {
                                                         user_firstname,
                                                         user_phone_number,
                                                         profile_picture_id,
-                                                        user_type_id
+                                                        media_path,
+                                                        USER_TYPE.user_type_id,
+                                                        user_type_libelle
                                                  FROM USER
+                                                          LEFT JOIN MEDIA ON MEDIA.media_id = USER.profile_picture_id
+                                                          JOIN USER_TYPE ON USER_TYPE.user_type_id = USER.user_type_id
                                                           JOIN SESSION on SESSION.user_id = USER.user_mail
                                                  where token = ?`, [
             token
@@ -203,7 +255,15 @@ export class UserController {
                     name: row["user_name"],
                     phoneNumber: row["user_phone_number"],
                     profilePictureId: row["profile_picture_id"],
-                    typeId: row["user_type_id"]
+                    profilePicture: new MediaModel({
+                        mediaId: row["profile_picture_id"],
+                        mediaPath: row["media_path"]
+                    }),
+                    typeId: row["user_type_id"],
+                    type: new UserTypeModel({
+                        userTypeId: row["user_type_id"],
+                        userTypeLibelle: row["user_type_libelle"]
+                    })
                 });
             }
         }
@@ -218,6 +278,9 @@ export class UserController {
         const setClause: string[] = [];
         const params = [];
 
+        if(options.password === "") {
+            options.password = undefined;
+        }
         if (options.password !== undefined) {
             setClause.push("user_password = ?");
             const hachedPassword = await hash(options.password, 5);

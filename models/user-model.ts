@@ -1,3 +1,6 @@
+import {MediaModel} from "./media-model";
+import {UserTypeModel} from "./user-type-model";
+
 export interface IUserProps {
     mail?: string;
     password?: string;
@@ -5,7 +8,9 @@ export interface IUserProps {
     firstname?: string;
     phoneNumber?: string;
     profilePictureId?: number;
+    profilePicture?: MediaModel;
     typeId?: number;
+    type?: UserTypeModel;
 }
 
 export class UserModel implements IUserProps {
@@ -15,7 +20,9 @@ export class UserModel implements IUserProps {
     firstname?: string;
     phoneNumber?: string;
     profilePictureId?: number;
+    profilePicture?: MediaModel;
     typeId?: number;
+    type?: UserTypeModel;
 
     constructor(properties: IUserProps) {
         this.mail = properties?.mail;
@@ -24,6 +31,8 @@ export class UserModel implements IUserProps {
         this.firstname = properties?.firstname;
         this.phoneNumber = properties?.phoneNumber;
         this.profilePictureId = properties?.profilePictureId;
+        this.profilePicture = properties.profilePicture;
         this.typeId = properties?.typeId;
+        this.type = properties.type;
     }
 }

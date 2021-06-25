@@ -61,15 +61,15 @@ export class TaskServiceImpl implements TaskService {
         if (options.priorityId !== null) {
             const priority = await this.priorityService.getPriorityById(options.priorityId as number);
             if (priority instanceof LogError)
-                return new LogError({numError: 404, text: "Priority not exists"});
+                return priority;
         }
         const list = await this.listService.getListById(options.listId);
         if (list instanceof LogError)
-            return new LogError({numError: 404, text: "List not exists"});
+            return list;
 
         const creator = await this.userService.getUserByMail(options.creatorId);
         if (creator instanceof LogError)
-            return new LogError({numError: 404, text: "Creator not exists"});
+            return creator;
 
         return this.taskController.createTask(options);
     }
@@ -109,22 +109,22 @@ export class TaskServiceImpl implements TaskService {
     async updateTask(options: TaskUpdateOptions): Promise<TaskModel | LogError> {
         const task = await this.taskController.getTaskById(options.taskId);
         if (task instanceof LogError)
-            return new LogError({numError: 404, text: "Task not exists"});
+            return task;
 
         if (options.statusId !== undefined) {
             const status = await this.statusService.getStatusById(options.statusId as number);
             if (status instanceof LogError)
-                return new LogError({numError: 404, text: "Status not exists"});
+                return status;
         }
         if (options.priorityId !== undefined) {
             const priority = await this.priorityService.getPriorityById(options.priorityId as number);
             if (priority instanceof LogError)
-                return new LogError({numError: 404, text: "Priority not exists"});
+                return priority;
         }
         if (options.listId !== undefined && options.listId !== task.listId) {
             const list = await this.listService.getListById(options.listId);
             if (list instanceof LogError)
-                return new LogError({numError: 404, text: "List not exists"});
+                return list;
 
             const positionInList = await this.getMaxPositionInListById(options.listId);
             if (positionInList instanceof LogError)
@@ -165,7 +165,7 @@ export class TaskServiceImpl implements TaskService {
     async getMaxPositionInListById(listId: number): Promise<number | LogError> {
         const list = await this.listService.getListById(listId);
         if (list instanceof LogError)
-            return new LogError({numError: 404, text: "List not exists"});
+            return list;
 
         return await this.taskController.getMaxPositionInListById(listId);
     }
@@ -208,11 +208,11 @@ export class TaskServiceImpl implements TaskService {
     async assignUserToTask(taskId: number, userMail: string): Promise<TaskModel | LogError> {
         const task = await this.taskController.getTaskById(taskId);
         if (task instanceof LogError)
-            return new LogError({numError: 409, text: "Task not exists"});
+            return task;
 
         const user = await this.userService.getUserByMail(userMail);
         if (user instanceof LogError)
-            return new LogError({numError: 404, text: "User not exists"});
+            return user;
 
         return this.taskController.assignUserToTask(taskId, userMail);
     }

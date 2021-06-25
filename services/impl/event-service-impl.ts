@@ -10,6 +10,7 @@ import {UserServiceImpl} from "./user-service-impl";
 import {StatusServiceImpl} from "./status-service-impl";
 import {MediaServiceImpl} from "./media-service-impl";
 import {ZoneServiceImpl} from "./zone-service-impl";
+import {CarpoolServiceImpl} from "./carpool-service-impl";
 
 export class EventServiceImpl implements EventService {
 
@@ -59,19 +60,19 @@ export class EventServiceImpl implements EventService {
     async createEvent(options: EventModel): Promise<EventModel | LogError> {
         const status = await this.statusService.getStatusById(options.statusId);
         if (status instanceof LogError)
-            return new LogError({numError: 404, text: "Status don't exists"});
+            return status;
 
         const picture = await this.mediaServcice.getMediaById(options.eventPitureId);
         if(picture instanceof LogError)
-            return new LogError({numError: 404, text: "Picture don't exists"});
+            return picture;
 
         const creator = await this.userService.getUserByMail(options.creatorId);
         if (creator instanceof LogError)
-            return new LogError({numError: 404, text: "User don't exists"});
+            return creator;
 
         const zone = await this.zoneService.getZoneById(options.zoneId);
         if(zone instanceof LogError)
-            return new LogError({numError: 404, text: "Zone don't exists"});
+            return zone;
 
         return this.eventController.createEvent(options);
     }
@@ -96,7 +97,7 @@ export class EventServiceImpl implements EventService {
         if(options.eventPitureId !== undefined) {
             const picture = await this.mediaServcice.getMediaById(options.eventPitureId);
             if(picture instanceof LogError)
-                return new LogError({numError: 404, text: "Picture don't exists"});
+                return picture;
         }
 
         return await this.eventController.updateEvent(options);
@@ -110,11 +111,11 @@ export class EventServiceImpl implements EventService {
     async registerEvent(eventId: number, userMail: string): Promise<UserModel[] | LogError> {
         const event = await this.getEventById(eventId);
         if (event instanceof LogError)
-            return new LogError({numError: 404, text: "Event don't exists"});
+            return event;
 
         const user = await this.userService.getUserByMail(userMail);
         if (user instanceof LogError)
-            return new LogError({numError: 404, text: "User don't exists"});
+            return user;
 
         return await this.eventController.registerEvent(eventId, userMail);
     }
@@ -127,13 +128,21 @@ export class EventServiceImpl implements EventService {
     async unregisterEvent(eventId: number, userMail: string): Promise<UserModel[] | LogError> {
         const event = await this.getEventById(eventId);
         if (event instanceof LogError)
-            return new LogError({numError: 404, text: "Event don't exists"});
+            return event;
 
         const user = await this.userService.getUserByMail(userMail);
         if (user instanceof LogError)
-            return new LogError({numError: 404, text: "User don't exists"});
+            return user;
 
-        return await this.eventController.unregisterEvent(eventId, userMail);
+        const participants = await this.eventController.unregisterEvent(eventId, userMail);
+        if(participants instanceof LogError)
+            return participants;
+
+        const success = await this.eventController.deleteEventCarpoolsOfUser(eventId, userMail);
+        if(success instanceof LogError)
+            return success;
+
+        return participants;
     }
 
     /**

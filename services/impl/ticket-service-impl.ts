@@ -65,16 +65,16 @@ export class TicketServiceImpl implements TicketService {
         if (options.statusId !== null) {
             const status = await this.statusService.getStatusById(options.statusId as number);
             if (status instanceof LogError)
-                return new LogError({numError: 404, text: "Status not exists"});
+                return status;
         }
         if (options.priorityId !== null) {
             const priority = await this.priorityService.getPriorityById(options.priorityId as number);
             if (priority instanceof LogError)
-                return new LogError({numError: 404, text: "Priority not exists"});
+                return priority;
         }
-        const creator = await this.userService.getUserByMail(options.creatorId);
+        /*const creator = await this.userService.getUserByMail(options.creatorId);
         if (creator instanceof LogError)
-            return new LogError({numError: 404, text: "Creator not exists"});
+            return creator;*/
 
         return this.ticketController.createTicket(options);
     }
@@ -111,12 +111,12 @@ export class TicketServiceImpl implements TicketService {
     async updateTicket(options: TicketUpdateOptions): Promise<TicketModel | LogError> {
         const ticket = await this.ticketController.getTicketById(options.ticketId);
         if (ticket instanceof LogError)
-            return new LogError({numError: 404, text: "Ticket not exists"});
+            return ticket;
 
         if (options.priorityId !== undefined) {
             const priority = await this.priorityService.getPriorityById(options.priorityId as number);
             if (priority instanceof LogError)
-                return new LogError({numError: 404, text: "Priority not exists"});
+                return priority;
         }
 
         return await this.ticketController.updateTicket(options);
@@ -137,7 +137,7 @@ export class TicketServiceImpl implements TicketService {
     async openTicket(id: number): Promise<TicketModel | LogError> {
         const ticket = await this.ticketController.getTicketById(id);
         if (ticket instanceof LogError)
-            return new LogError({numError: 404, text: "Ticket not exists"});
+            return ticket;
 
         return await this.ticketController.openTicket(id);
     }
@@ -149,7 +149,7 @@ export class TicketServiceImpl implements TicketService {
     async closeTicket(id: number): Promise<TicketModel | LogError> {
         const ticket = await this.ticketController.getTicketById(id);
         if (ticket instanceof LogError)
-            return new LogError({numError: 404, text: "Ticket not exists"});
+            return ticket;
 
         return await this.ticketController.closeTicket(id);
     }
@@ -161,7 +161,7 @@ export class TicketServiceImpl implements TicketService {
     async archiveTicket(id: number): Promise<TicketModel | LogError> {
         const ticket = await this.ticketController.getTicketById(id);
         if (ticket instanceof LogError)
-            return new LogError({numError: 404, text: "Ticket not exists"});
+            return ticket;
 
         return await this.ticketController.archiveTicket(id);
     }
@@ -174,11 +174,11 @@ export class TicketServiceImpl implements TicketService {
     async assignUserToTicket(ticketId: number, userMail: string): Promise<TicketModel | LogError> {
         const ticket = await this.ticketController.getTicketById(ticketId);
         if (ticket instanceof LogError)
-            return new LogError({numError: 409, text: "Task not exists"});
+            return ticket;
 
         const user = await this.userService.getUserByMail(userMail);
         if (user instanceof LogError)
-            return new LogError({numError: 404, text: "User not exists"});
+            return user;
 
         return this.ticketController.assignUserToTicket(ticketId, userMail);
     }
