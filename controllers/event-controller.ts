@@ -405,11 +405,11 @@ export class EventController {
                                                           JOIN ZONE ON ZONE.zone_id = EVENT.zone_id
                                                           LEFT JOIN MEDIA ON EVENT.event_picture_id = MEDIA.media_id
                                                           LEFT JOIN PARTICIPATE_USER_EVENT PUE ON EVENT.event_id = PUE.event_id
-                                                 WHERE ( creator_id OR user_id = ? )
+                                                 WHERE ( creator_id = ? OR user_id = ? )
                                                    AND date_hour_start > NOW()
                                                    AND EVENT.event_id IS NOT NULL
                                                  ORDER BY EVENT.status_id ASC, date_hour_start DESC`, [
-            userMail
+            userMail, userMail
         ]);
         const data = res[0];
         if (Array.isArray(data)) {
@@ -474,11 +474,11 @@ export class EventController {
                                                           JOIN ZONE ON ZONE.zone_id = EVENT.zone_id
                                                           LEFT JOIN MEDIA ON EVENT.event_picture_id = MEDIA.media_id
                                                           LEFT JOIN PARTICIPATE_USER_EVENT PUE ON EVENT.event_id = PUE.event_id
-                                                    WHERE ( creator_id OR user_id = ? )
+                                                    WHERE ( creator_id = ? OR user_id = ? )
                                                       AND date_hour_start < NOW()
                                                       AND date_hour_end > NOW()
                                                     ORDER BY EVENT.status_id ASC, date_hour_start DESC`, [
-            userMail
+            userMail, userMail
         ]);
         const data = res[0];
         if (Array.isArray(data)) {
