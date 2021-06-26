@@ -299,10 +299,11 @@ export class EventController {
                                                           JOIN ZONE ON ZONE.zone_id = EVENT.zone_id
                                                           LEFT JOIN MEDIA ON EVENT.event_picture_id = MEDIA.media_id
                                                           LEFT JOIN PARTICIPATE_USER_EVENT PUE ON EVENT.event_id = PUE.event_id
-                                                 WHERE creator_id = ? 
-                                                   AND date_hour_end < NOW()
+                                                    WHERE ( creator_id = ? OR user_id = ? )
+                                                AND date_hour_end < NOW()
+                                                GROUP BY EVENT.event_id, event_title
                                                  ORDER BY EVENT.status_id ASC, date_hour_start DESC`, [
-            userMail
+            userMail,userMail
         ]);
         const data = res[0];
         if (Array.isArray(data)) {
@@ -340,51 +341,12 @@ export class EventController {
         return [];
     }
 
-    /*  async getPastEventsByUser(userMail: string): Promise<EventModel[]> {
-          const res = await this.connection.query(`SELECT event_id,
-                                                          event_title,
-                                                          event_description,
-                                                          date_hour_start,
-                                                          date_hour_end,
-                                                          date_hour_creation,
-                                                          event_max_nb_places,
-                                                          event_picture_id,
-                                                          status_id,
-                                                          creator_id,
-                                                          zone_id
-                                                   FROM EVENT
-                                                   WHERE creator_id = ?
-                                                     AND date_hour_end < NOW()
-                                                   ORDER BY status_id ASC, date_hour_start DESC`, [
-              userMail
-          ]);
-          const data = res[0];
-          if (Array.isArray(data)) {
-              return (data as RowDataPacket[]).map(function (row: any) {
-                  return new EventModel({
-                      eventId: row["event_id"],
-                      eventTitle: row["event_title"],
-                      eventDescription: row["event_description"],
-                      dateHourStart: row["date_hour_start"],
-                      dateHourEnd: row["date_hour_end"],
-                      dateHourCreation: row["date_hour_creation"],
-                      eventMaxNbPlaces: row["event_max_nb_places"],
-                      eventPitureId: row["event_picture_id"],
-                      statusId: row["status_id"],
-                      creatorId: row["creator_id"],
-                      zoneId: row["zone_id"]
-                  });
-              });
-          }
-          return [];
-      }*/
 
     async getFutureEventsByUser(userMail: string): Promise<EventModel[]> {
         const res = await this.connection.query(`SELECT EVENT.event_id,
                                                         event_title,
                                                         event_description,
                                                         date_hour_start,
-                                                        date_hour_start > NOW()                                as isFuture,
                                                         date_hour_end,
                                                         date_hour_creation,
                                                         event_max_nb_places,
@@ -405,11 +367,11 @@ export class EventController {
                                                           JOIN ZONE ON ZONE.zone_id = EVENT.zone_id
                                                           LEFT JOIN MEDIA ON EVENT.event_picture_id = MEDIA.media_id
                                                           LEFT JOIN PARTICIPATE_USER_EVENT PUE ON EVENT.event_id = PUE.event_id
-                                                 WHERE ( creator_id = ? OR user_id = ? )
-                                                   AND date_hour_start > NOW()
-                                                   AND EVENT.event_id IS NOT NULL
+                                               WHERE ( creator_id = ? OR user_id = ? )
+                                                AND date_hour_start > NOW()
+                                                GROUP BY EVENT.event_id, event_title
                                                  ORDER BY EVENT.status_id ASC, date_hour_start DESC`, [
-            userMail, userMail
+            userMail,userMail
         ]);
         const data = res[0];
         if (Array.isArray(data)) {
@@ -446,8 +408,7 @@ export class EventController {
         }
         return [];
     }
-
-
+    
     async getActualEventsByUser(userMail: string): Promise<EventModel[]> {
         const res = await this.connection.query(`SELECT EVENT.event_id,
                                                         event_title,
@@ -477,6 +438,7 @@ export class EventController {
                                                     WHERE ( creator_id = ? OR user_id = ? )
                                                       AND date_hour_start < NOW()
                                                       AND date_hour_end > NOW()
+                                                      GROUP BY EVENT.event_id, event_title
                                                     ORDER BY EVENT.status_id ASC, date_hour_start DESC`, [
             userMail, userMail
         ]);
