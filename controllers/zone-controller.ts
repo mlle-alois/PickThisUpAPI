@@ -209,8 +209,11 @@ export class ZoneController {
                                                         zone_description,
                                                         signalman_id,
                                                         status_id,
-                                                        pollution_level_id
+                                                        ZONE.pollution_level_id,
+                                                        pollution_level_libelle
                                                  FROM ZONE
+                                                  JOIN POLLUTION_LEVEL
+                                                               ON POLLUTION_LEVEL.pollution_level_id = ZONE.pollution_level_id
                                                  WHERE signalman_id = ?`, [
             userMail
         ]);
@@ -225,7 +228,11 @@ export class ZoneController {
                     zoneDescription: row["zone_description"],
                     signalmanId: row["signalman_id"],
                     statusId: row["status_id"],
-                    pollutionLevelId: row["pollution_level_id"]
+                    pollutionLevelId: row["pollution_level_id"],
+                    pollutionLevel: new PollutionLevelModel({
+                        pollutionLevelId: row["pollution_level_id"],
+                        pollutionLevelLibelle: row["pollution_level_libelle"]
+                    })
                 });
             });
         }

@@ -408,7 +408,7 @@ export class EventController {
         }
         return [];
     }
-    
+
     async getActualEventsByUser(userMail: string): Promise<EventModel[]> {
         const res = await this.connection.query(`SELECT EVENT.event_id,
                                                         event_title,
