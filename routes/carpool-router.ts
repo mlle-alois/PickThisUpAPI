@@ -144,7 +144,7 @@ carpoolRouter.delete("/delete/:id", authUserMiddleWare, async function (req, res
         const success = await carpoolService.deleteCarpoolById(Number.parseInt(id));
 
         if (success)
-            res.status(204).end();
+            res.json(success);
         else
             res.status(404).end();
     }

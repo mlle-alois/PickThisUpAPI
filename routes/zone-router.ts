@@ -174,7 +174,7 @@ zoneRouter.put("/update/:id", authUserMiddleWare, async function (req, res, next
  */
 zoneRouter.delete("/delete/:id", authUserMiddleWare, async function (req, res, next) {
     try {
-        if (await isDevConnected(req)) {
+        if (!await isBlockedUserConnected(req)) {
             const connection = await DatabaseUtils.getConnection();
             const zoneService = new ZoneServiceImpl(connection);
 
@@ -186,7 +186,7 @@ zoneRouter.delete("/delete/:id", authUserMiddleWare, async function (req, res, n
             const success = await zoneService.deleteZoneById(Number.parseInt(id));
 
             if (success)
-                res.status(204).end();
+                res.json(success);
             else
                 res.status(404).end();
         }
