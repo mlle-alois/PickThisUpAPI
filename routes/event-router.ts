@@ -172,7 +172,7 @@ eventRouter.put("/update/:id", authUserMiddleWare, async function (req, res, nex
  * Nécessite d'être connecté : OUI
  */
 eventRouter.delete("/delete/:id", authUserMiddleWare, async function (req, res, next) {
-    if (await isDevConnected(req)) {
+    if (!await isBlockedUserConnected(req)) {
         const connection = await DatabaseUtils.getConnection();
         const eventService = new EventServiceImpl(connection);
 
@@ -184,7 +184,7 @@ eventRouter.delete("/delete/:id", authUserMiddleWare, async function (req, res, 
         const success = await eventService.deleteEventsById(Number.parseInt(id));
 
         if (success)
-            res.status(204).end();
+            res.json(success);
         else
             res.status(404).end();
     }

@@ -169,8 +169,8 @@ export class EventController {
                 options.eventId,
                 options.eventTitle,
                 options.eventDescription,
-                DateUtils.addXHoursToDate(new Date(options.dateHourStart), 2),
-                DateUtils.addXHoursToDate(new Date(options.dateHourEnd), 2),
+                new Date(options.dateHourStart),
+                new Date(options.dateHourEnd),
                 options.dateHourCreation,
                 options.eventMaxNbPlaces,
                 options.eventPitureId,
@@ -215,11 +215,11 @@ export class EventController {
         }
         if (options.dateHourStart !== undefined) {
             setClause.push("date_hour_start = ?");
-            params.push(DateUtils.addXHoursToDate(new Date(options.dateHourStart), 2));
+            params.push(new Date(options.dateHourStart));
         }
         if (options.dateHourEnd !== undefined) {
             setClause.push("date_hour_end = ?");
-            params.push(DateUtils.addXHoursToDate(new Date(options.dateHourEnd), 2));
+            params.push(new Date(options.dateHourEnd));
         }
         if (options.eventMaxNbPlaces !== undefined) {
             setClause.push("event_max_nb_places = ?");
