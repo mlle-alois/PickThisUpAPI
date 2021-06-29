@@ -194,7 +194,7 @@ export class UserController {
                                                  FROM USER
                                                           LEFT JOIN MEDIA ON MEDIA.media_id = USER.profile_picture_id
                                                           JOIN USER_TYPE ON USER_TYPE.user_type_id = USER.user_type_id
-                                                 WHERE user_type_id = 1 LIMIT ?, ?`, [
+                                                 WHERE USER.user_type_id = 1 LIMIT ?, ?`, [
             offset, limit
         ]);
         const data = res[0];
