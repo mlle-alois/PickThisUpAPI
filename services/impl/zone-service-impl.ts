@@ -1,9 +1,5 @@
-import {
-    ZoneController,
-    ZoneGetAllOptions,
-    ZoneUpdateOptions
-} from "../../controllers";
-import {LogError, ZoneModel, UserModel, MediaModel, EventModel} from "../../models";
+import {ZoneController, ZoneGetAllOptions, ZoneUpdateOptions} from "../../controllers";
+import {LogError, MediaModel, ZoneModel} from "../../models";
 import {Connection} from "mysql2/promise";
 import {ZoneService} from "../zone-service";
 import {UserServiceImpl} from "./user-service-impl";

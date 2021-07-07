@@ -406,7 +406,16 @@ export class ZoneController {
             ]);
             const headers = res[0] as ResultSetHeader;
             if (headers.affectedRows > 0) {
-                return this.getZoneById(zoneId);
+                const res2 = await this.connection.execute(`UPDATE EVENT
+                                                       SET status_id = 6
+                                                       WHERE zone_id = ?`, [
+                    zoneId
+                ]);
+                const headers2 = res2[0] as ResultSetHeader;
+                if (headers2.affectedRows > 0) {
+                    return this.getZoneById(zoneId);
+                }
+                return new LogError({numError: 400, text: "The zone refusal failed"});
             }
             return new LogError({numError: 400, text: "The zone refusal failed"});
         } catch (err) {
