@@ -3,7 +3,7 @@ import {SessionController, UserController} from "../controllers";
 import express from "express";
 import {LogError, SessionModel} from "../models";
 import {DateUtils} from "./DateUtils";
-import {BLOCKED_USER_USER_TYPE_ID, DEV_USER_TYPE_ID, SUPER_ADMIN_USER_TYPE_ID} from "../consts";
+import {ADMIN_USER_TYPE_ID, BLOCKED_USER_USER_TYPE_ID, DEV_USER_TYPE_ID, SUPER_ADMIN_USER_TYPE_ID} from "../consts";
 
 /**
  * Récupération du token autorisé/connecté
@@ -94,7 +94,7 @@ export async function isAdministratorConnected(req: express.Request): Promise<bo
             return false;
 
         if (user.typeId === DEV_USER_TYPE_ID || user.typeId === SUPER_ADMIN_USER_TYPE_ID
-            || user.typeId === DEV_USER_TYPE_ID) {
+            || user.typeId === ADMIN_USER_TYPE_ID) {
             return true;
         }
     }
