@@ -363,7 +363,7 @@ eventRouter.get("/getActualEventsByUser", authUserMiddleWare, async function (re
  */
 eventRouter.get("/getValidatedEvents", authUserMiddleWare, async function (req, res, next) {
     try {
-        if (await isDevConnected(req)) {
+        if (await isAdministratorConnected(req)) {
             const connection = await DatabaseUtils.getConnection();
             const eventService = new EventServiceImpl(connection);
 
@@ -389,7 +389,7 @@ eventRouter.get("/getValidatedEvents", authUserMiddleWare, async function (req, 
  */
 eventRouter.get("/getWaitingEvents", authUserMiddleWare, async function (req, res, next) {
     try {
-        if (await isDevConnected(req)) {
+        if (await isAdministratorConnected(req)) {
             const connection = await DatabaseUtils.getConnection();
             const eventService = new EventServiceImpl(connection);
 
@@ -415,7 +415,7 @@ eventRouter.get("/getWaitingEvents", authUserMiddleWare, async function (req, re
  */
 eventRouter.get("/getRefusedEvents", authUserMiddleWare, async function (req, res, next) {
     try {
-        if (await isDevConnected(req)) {
+        if (await isAdministratorConnected(req)) {
             const connection = await DatabaseUtils.getConnection();
             const eventService = new EventServiceImpl(connection);
 

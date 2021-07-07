@@ -29,7 +29,7 @@ zoneRouter.post("/add", authUserMiddleWare, async function (req, res, next) {
             const description = req.body.description;
             const pollutionLevel = req.body.pollutionLevel;
 
-            if (street === undefined || zipcode === undefined || city === undefined || description === undefined ||pollutionLevel === undefined) {
+            if (street === undefined || zipcode === undefined || city === undefined || description === undefined || pollutionLevel === undefined) {
                 res.status(400).end("Veuillez renseigner les informations nécessaires");
                 return;
             }
@@ -250,6 +250,84 @@ zoneRouter.get("/my-zones", authUserMiddleWare, async function (req, res, next) 
             LogError.HandleStatus(res, zones);
         else
             res.json(zones);
+    } catch (err) {
+        next(err);
+    }
+});
+
+/**
+ * récupérer les zones validées
+ * URL : /zone/getValidatedZones
+ * Requete : GET
+ * ACCES : DEV
+ * Nécessite d'être connecté : OUI
+ */
+zoneRouter.get("/getValidatedZones", authUserMiddleWare, async function (req, res, next) {
+    try {
+        if (await isAdministratorConnected(req)) {
+            const connection = await DatabaseUtils.getConnection();
+            const zoneService = new ZoneServiceImpl(connection);
+
+            const zones = await zoneService.getValidatedZones();
+
+            if (zones instanceof LogError)
+                LogError.HandleStatus(res, zones);
+            else
+                res.json(zones);
+        }
+        res.status(403).end();
+    } catch (err) {
+        next(err);
+    }
+});
+
+/**
+ * récupérer les zones en attente
+ * URL : /zone/getWaitingZones
+ * Requete : GET
+ * ACCES : DEV
+ * Nécessite d'être connecté : OUI
+ */
+zoneRouter.get("/getWaitingZones", authUserMiddleWare, async function (req, res, next) {
+    try {
+        if (await isAdministratorConnected(req)) {
+            const connection = await DatabaseUtils.getConnection();
+            const zoneService = new ZoneServiceImpl(connection);
+
+            const zones = await zoneService.getWaitingZones();
+
+            if (zones instanceof LogError)
+                LogError.HandleStatus(res, zones);
+            else
+                res.json(zones);
+        }
+        res.status(403).end();
+    } catch (err) {
+        next(err);
+    }
+});
+
+/**
+ * récupérer les zones refusées
+ * URL : /zone/getRefusedZones
+ * Requete : GET
+ * ACCES : DEV
+ * Nécessite d'être connecté : OUI
+ */
+zoneRouter.get("/getRefusedZones", authUserMiddleWare, async function (req, res, next) {
+    try {
+        if (await isAdministratorConnected(req)) {
+            const connection = await DatabaseUtils.getConnection();
+            const zoneService = new ZoneServiceImpl(connection);
+
+            const zones = await zoneService.getRefusedZones();
+
+            if (zones instanceof LogError)
+                LogError.HandleStatus(res, zones);
+            else
+                res.json(zones);
+        }
+        res.status(403).end();
     } catch (err) {
         next(err);
     }

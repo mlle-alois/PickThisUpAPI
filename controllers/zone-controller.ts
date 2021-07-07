@@ -239,6 +239,114 @@ export class ZoneController {
         return [];
     }
 
+    async getValidatedZones(): Promise<ZoneModel[]> {
+        const res = await this.connection.query(`SELECT zone_id,
+                                                        zone_street,
+                                                        zone_zipcode,
+                                                        zone_city,
+                                                        zone_description,
+                                                        signalman_id,
+                                                        status_id,
+                                                        ZONE.pollution_level_id,
+                                                        pollution_level_libelle
+                                                 FROM ZONE
+                                                          JOIN POLLUTION_LEVEL
+                                                               ON POLLUTION_LEVEL.pollution_level_id = ZONE.pollution_level_id
+                                                 WHERE status_id = 4`);
+        const data = res[0];
+        if (Array.isArray(data)) {
+            return (data as RowDataPacket[]).map(function (row: any) {
+                return new ZoneModel({
+                    zoneId: row["zone_id"],
+                    zoneStreet: row["zone_street"],
+                    zoneZipcode: row["zone_zipcode"],
+                    zoneCity: row["zone_city"],
+                    zoneDescription: row["zone_description"],
+                    signalmanId: row["signalman_id"],
+                    statusId: row["status_id"],
+                    pollutionLevelId: row["pollution_level_id"],
+                    pollutionLevel: new PollutionLevelModel({
+                        pollutionLevelId: row["pollution_level_id"],
+                        pollutionLevelLibelle: row["pollution_level_libelle"]
+                    })
+                });
+            });
+        }
+        return [];
+    }
+
+    async getWaitingZones(): Promise<ZoneModel[]> {
+        const res = await this.connection.query(`SELECT zone_id,
+                                                        zone_street,
+                                                        zone_zipcode,
+                                                        zone_city,
+                                                        zone_description,
+                                                        signalman_id,
+                                                        status_id,
+                                                        ZONE.pollution_level_id,
+                                                        pollution_level_libelle
+                                                 FROM ZONE
+                                                          JOIN POLLUTION_LEVEL
+                                                               ON POLLUTION_LEVEL.pollution_level_id = ZONE.pollution_level_id
+                                                 WHERE status_id = 5`);
+        const data = res[0];
+        if (Array.isArray(data)) {
+            return (data as RowDataPacket[]).map(function (row: any) {
+                return new ZoneModel({
+                    zoneId: row["zone_id"],
+                    zoneStreet: row["zone_street"],
+                    zoneZipcode: row["zone_zipcode"],
+                    zoneCity: row["zone_city"],
+                    zoneDescription: row["zone_description"],
+                    signalmanId: row["signalman_id"],
+                    statusId: row["status_id"],
+                    pollutionLevelId: row["pollution_level_id"],
+                    pollutionLevel: new PollutionLevelModel({
+                        pollutionLevelId: row["pollution_level_id"],
+                        pollutionLevelLibelle: row["pollution_level_libelle"]
+                    })
+                });
+            });
+        }
+        return [];
+    }
+
+    async getRefusedZones(): Promise<ZoneModel[]> {
+        const res = await this.connection.query(`SELECT zone_id,
+                                                        zone_street,
+                                                        zone_zipcode,
+                                                        zone_city,
+                                                        zone_description,
+                                                        signalman_id,
+                                                        status_id,
+                                                        ZONE.pollution_level_id,
+                                                        pollution_level_libelle
+                                                 FROM ZONE
+                                                          JOIN POLLUTION_LEVEL
+                                                               ON POLLUTION_LEVEL.pollution_level_id = ZONE.pollution_level_id
+                                                 WHERE status_id = 6`);
+        const data = res[0];
+        if (Array.isArray(data)) {
+            return (data as RowDataPacket[]).map(function (row: any) {
+                return new ZoneModel({
+                    zoneId: row["zone_id"],
+                    zoneStreet: row["zone_street"],
+                    zoneZipcode: row["zone_zipcode"],
+                    zoneCity: row["zone_city"],
+                    zoneDescription: row["zone_description"],
+                    signalmanId: row["signalman_id"],
+                    statusId: row["status_id"],
+                    pollutionLevelId: row["pollution_level_id"],
+                    pollutionLevel: new PollutionLevelModel({
+                        pollutionLevelId: row["pollution_level_id"],
+                        pollutionLevelLibelle: row["pollution_level_libelle"]
+                    })
+                });
+            });
+        }
+        return [];
+    }
+
     async getZonesByUserAndStatus(userMail: string, statusId: number): Promise<ZoneModel[]> {
         const res = await this.connection.query(`SELECT zone_id,
                                                         zone_street,

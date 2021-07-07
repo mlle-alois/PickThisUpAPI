@@ -1,4 +1,4 @@
-import {LogError, ZoneModel, UserModel, MediaModel} from "../models";
+import {LogError, ZoneModel, UserModel, MediaModel, EventModel} from "../models";
 import {ZoneGetAllOptions, ZoneUpdateOptions} from "../controllers";
 
 export interface ZoneService {
@@ -20,6 +20,12 @@ export interface ZoneService {
     refuseZone(zoneId: number): Promise<ZoneModel | LogError>;
 
     getZonesByUser(userMail: string): Promise<ZoneModel[] | LogError>;
+
+    getValidatedZones(): Promise<ZoneModel[]>;
+
+    getWaitingZones(): Promise<ZoneModel[]>;
+
+    getRefusedZones(): Promise<ZoneModel[]>;
 
     getZonesByUserAndStatus(userMail: string, statusId: number): Promise<ZoneModel[] | LogError>;
 

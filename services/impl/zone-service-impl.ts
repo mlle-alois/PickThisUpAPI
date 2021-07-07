@@ -3,7 +3,7 @@ import {
     ZoneGetAllOptions,
     ZoneUpdateOptions
 } from "../../controllers";
-import {LogError, ZoneModel, UserModel, MediaModel} from "../../models";
+import {LogError, ZoneModel, UserModel, MediaModel, EventModel} from "../../models";
 import {Connection} from "mysql2/promise";
 import {ZoneService} from "../zone-service";
 import {UserServiceImpl} from "./user-service-impl";
@@ -116,6 +116,27 @@ export class ZoneServiceImpl implements ZoneService {
             return user;
 
         return await this.zoneController.getZonesByUser(userMail);
+    }
+
+    /**
+     * récupérer les zones validées
+     */
+    async getValidatedZones(): Promise<ZoneModel[]> {
+        return await this.zoneController.getValidatedZones();
+    }
+
+    /**
+     * récupérer les zones en attente
+     */
+    async getWaitingZones(): Promise<ZoneModel[]> {
+        return await this.zoneController.getWaitingZones();
+    }
+
+    /**
+     * récupérer les zones refusées
+     */
+    async getRefusedZones(): Promise<ZoneModel[]> {
+        return await this.zoneController.getRefusedZones();
     }
 
     /**

@@ -25,6 +25,12 @@ export interface EventService {
 
     getActualEventsByUser(userMail: string): Promise<EventModel[] | LogError>;
 
+    getValidatedEvents(): Promise<EventModel[]>;
+
+    getWaitingEvents(): Promise<EventModel[]>;
+
+    getRefusedEvents(): Promise<EventModel[]>;
+
     acceptEvent(eventId: number): Promise<EventModel | LogError>;
 
     refuseEvent(eventId: number): Promise<EventModel | LogError>;
