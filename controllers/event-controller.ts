@@ -478,6 +478,210 @@ export class EventController {
         return [];
     }
 
+    /**
+     * trié dans la date décroissante pour voir les derniers validés
+     */
+    async getValidatedEvents(): Promise<EventModel[]> {
+        const res = await this.connection.query(`SELECT EVENT.event_id,
+                                                        event_title,
+                                                        event_description,
+                                                        date_hour_start,
+                                                        date_hour_start > NOW()                                as isFuture,
+                                                        date_hour_end,
+                                                        date_hour_creation,
+                                                        event_max_nb_places,
+                                                        COALESCE(event_max_nb_places - COUNT(PUE.event_id), 0) as event_remaining_places,
+                                                        event_picture_id,
+                                                        coalesce(media_path, "pickThisUpLogo.PNG")             as media_path,
+                                                        EVENT.status_id                                        as event_status_id,
+                                                        creator_id,
+                                                        EVENT.zone_id                                          as zone_id,
+                                                        zone_description,
+                                                        zone_street,
+                                                        zone_zipcode,
+                                                        zone_city,
+                                                        ZONE.status_id                                         as zone_status_id,
+                                                        signalman_id,
+                                                        pollution_level_id
+                                                 FROM EVENT
+                                                          JOIN ZONE ON ZONE.zone_id = EVENT.zone_id
+                                                          LEFT JOIN MEDIA ON EVENT.event_picture_id = MEDIA.media_id
+                                                          LEFT JOIN PARTICIPATE_USER_EVENT PUE ON EVENT.event_id = PUE.event_id
+                                                 WHERE EVENT.status_id = 4
+                                                 GROUP BY EVENT.event_id, event_title
+                                                 ORDER BY date_hour_start DESC`);
+        const data = res[0];
+        if (Array.isArray(data)) {
+            return (data as RowDataPacket[]).map(function (row: any) {
+                return new EventModel({
+                    eventId: row["event_id"],
+                    eventTitle: row["event_title"],
+                    eventDescription: row["event_description"],
+                    dateHourStart: row["date_hour_start"],
+                    dateHourEnd: row["date_hour_end"],
+                    dateHourCreation: row["date_hour_creation"],
+                    eventMaxNbPlaces: row["event_max_nb_places"],
+                    eventRemainingPlaces: row["event_remaining_places"],
+                    eventPitureId: row["event_picture_id"],
+                    picture: new MediaModel({
+                        mediaId: row["event_picture_id"],
+                        mediaPath: row["media_path"]
+                    }),
+                    statusId: row["event_status_id"],
+                    creatorId: row["creator_id"],
+                    zoneId: row["zone_id"],
+                    zone: new ZoneModel({
+                        zoneId: row["zone_id"],
+                        zoneDescription: row["zone_description"],
+                        zoneStreet: row["zone_street"],
+                        zoneZipcode: row["zone_zipcode"],
+                        zoneCity: row["zone_city"],
+                        statusId: row["zone_status_id"],
+                        signalmanId: row["signalman_id"],
+                        pollutionLevelId: row["pollution_level_id"]
+                    })
+                });
+            });
+        }
+        return [];
+    }
+
+    /**
+     * trié par date la plus proche pour traiter les événements qui arrivent le plus tôt
+     */
+    async getWaitingEvents(): Promise<EventModel[]> {
+        const res = await this.connection.query(`SELECT EVENT.event_id,
+                                                        event_title,
+                                                        event_description,
+                                                        date_hour_start,
+                                                        date_hour_start > NOW()                                as isFuture,
+                                                        date_hour_end,
+                                                        date_hour_creation,
+                                                        event_max_nb_places,
+                                                        COALESCE(event_max_nb_places - COUNT(PUE.event_id), 0) as event_remaining_places,
+                                                        event_picture_id,
+                                                        coalesce(media_path, "pickThisUpLogo.PNG")             as media_path,
+                                                        EVENT.status_id                                        as event_status_id,
+                                                        creator_id,
+                                                        EVENT.zone_id                                          as zone_id,
+                                                        zone_description,
+                                                        zone_street,
+                                                        zone_zipcode,
+                                                        zone_city,
+                                                        ZONE.status_id                                         as zone_status_id,
+                                                        signalman_id,
+                                                        pollution_level_id
+                                                 FROM EVENT
+                                                          JOIN ZONE ON ZONE.zone_id = EVENT.zone_id
+                                                          LEFT JOIN MEDIA ON EVENT.event_picture_id = MEDIA.media_id
+                                                          LEFT JOIN PARTICIPATE_USER_EVENT PUE ON EVENT.event_id = PUE.event_id
+                                                 WHERE EVENT.status_id = 5
+                                                 GROUP BY EVENT.event_id, event_title
+                                                 ORDER BY date_hour_start`);
+        const data = res[0];
+        if (Array.isArray(data)) {
+            return (data as RowDataPacket[]).map(function (row: any) {
+                return new EventModel({
+                    eventId: row["event_id"],
+                    eventTitle: row["event_title"],
+                    eventDescription: row["event_description"],
+                    dateHourStart: row["date_hour_start"],
+                    dateHourEnd: row["date_hour_end"],
+                    dateHourCreation: row["date_hour_creation"],
+                    eventMaxNbPlaces: row["event_max_nb_places"],
+                    eventRemainingPlaces: row["event_remaining_places"],
+                    eventPitureId: row["event_picture_id"],
+                    picture: new MediaModel({
+                        mediaId: row["event_picture_id"],
+                        mediaPath: row["media_path"]
+                    }),
+                    statusId: row["event_status_id"],
+                    creatorId: row["creator_id"],
+                    zoneId: row["zone_id"],
+                    zone: new ZoneModel({
+                        zoneId: row["zone_id"],
+                        zoneDescription: row["zone_description"],
+                        zoneStreet: row["zone_street"],
+                        zoneZipcode: row["zone_zipcode"],
+                        zoneCity: row["zone_city"],
+                        statusId: row["zone_status_id"],
+                        signalmanId: row["signalman_id"],
+                        pollutionLevelId: row["pollution_level_id"]
+                    })
+                });
+            });
+        }
+        return [];
+    }
+
+    /**
+     * trié dans la date décroissante pour voir les derniers refusés
+     */
+    async getRefusedEvents(): Promise<EventModel[]> {
+        const res = await this.connection.query(`SELECT EVENT.event_id,
+                                                        event_title,
+                                                        event_description,
+                                                        date_hour_start,
+                                                        date_hour_start > NOW()                                as isFuture,
+                                                        date_hour_end,
+                                                        date_hour_creation,
+                                                        event_max_nb_places,
+                                                        COALESCE(event_max_nb_places - COUNT(PUE.event_id), 0) as event_remaining_places,
+                                                        event_picture_id,
+                                                        coalesce(media_path, "pickThisUpLogo.PNG")             as media_path,
+                                                        EVENT.status_id                                        as event_status_id,
+                                                        creator_id,
+                                                        EVENT.zone_id                                          as zone_id,
+                                                        zone_description,
+                                                        zone_street,
+                                                        zone_zipcode,
+                                                        zone_city,
+                                                        ZONE.status_id                                         as zone_status_id,
+                                                        signalman_id,
+                                                        pollution_level_id
+                                                 FROM EVENT
+                                                          JOIN ZONE ON ZONE.zone_id = EVENT.zone_id
+                                                          LEFT JOIN MEDIA ON EVENT.event_picture_id = MEDIA.media_id
+                                                          LEFT JOIN PARTICIPATE_USER_EVENT PUE ON EVENT.event_id = PUE.event_id
+                                                 WHERE EVENT.status_id = 6
+                                                 GROUP BY EVENT.event_id, event_title
+                                                 ORDER BY date_hour_start DESC`);
+        const data = res[0];
+        if (Array.isArray(data)) {
+            return (data as RowDataPacket[]).map(function (row: any) {
+                return new EventModel({
+                    eventId: row["event_id"],
+                    eventTitle: row["event_title"],
+                    eventDescription: row["event_description"],
+                    dateHourStart: row["date_hour_start"],
+                    dateHourEnd: row["date_hour_end"],
+                    dateHourCreation: row["date_hour_creation"],
+                    eventMaxNbPlaces: row["event_max_nb_places"],
+                    eventRemainingPlaces: row["event_remaining_places"],
+                    eventPitureId: row["event_picture_id"],
+                    picture: new MediaModel({
+                        mediaId: row["event_picture_id"],
+                        mediaPath: row["media_path"]
+                    }),
+                    statusId: row["event_status_id"],
+                    creatorId: row["creator_id"],
+                    zoneId: row["zone_id"],
+                    zone: new ZoneModel({
+                        zoneId: row["zone_id"],
+                        zoneDescription: row["zone_description"],
+                        zoneStreet: row["zone_street"],
+                        zoneZipcode: row["zone_zipcode"],
+                        zoneCity: row["zone_city"],
+                        statusId: row["zone_status_id"],
+                        signalmanId: row["signalman_id"],
+                        pollutionLevelId: row["pollution_level_id"]
+                    })
+                });
+            });
+        }
+        return [];
+    }
+
 
     async acceptEvent(eventId: number): Promise<EventModel | LogError> {
         try {

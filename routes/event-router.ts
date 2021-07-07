@@ -10,7 +10,7 @@ import {
 } from "../Utils";
 import {EventServiceImpl} from "../services/impl";
 import {LogError} from "../models";
-import {ON_ATTEMPT_STATUS, REFUSED_STATUS, VALIDATED_STATUS} from "../consts";
+import {ON_ATTEMPT_STATUS, VALIDATED_STATUS} from "../consts";
 
 const eventRouter = express.Router();
 
@@ -22,57 +22,60 @@ const eventRouter = express.Router();
  * Nécessite d'être connecté : OUI
  */
 eventRouter.post("/add", authUserMiddleWare, async function (req, res, next) {
-    //vérification droits d'accès
-    if (!await isBlockedUserConnected(req)) {
-        const connection = await DatabaseUtils.getConnection();
-        const eventService = new EventServiceImpl(connection);
+    try {
+        if (!await isBlockedUserConnected(req)) {
+            const connection = await DatabaseUtils.getConnection();
+            const eventService = new EventServiceImpl(connection);
 
-        const id = await eventService.getMaxEventId() + 1;
-        const title = req.body.title;
-        const description = req.body.description;
-        const dateHourStart = req.body.dateHourStart; // ex "2021-04-03 18:34:48"
-        const dateHourEnd = req.body.dateHourEnd; // ex "2021-04-03 18:34:48"
-        const maxNbPlaces = req.body.maxNbPlaces;
-        const pictureId = req.body.pictureId;
-        const zoneId = req.body.zoneId;
+            const id = await eventService.getMaxEventId() + 1;
+            const title = req.body.title;
+            const description = req.body.description;
+            const dateHourStart = req.body.dateHourStart; // ex "2021-04-03 18:34:48"
+            const dateHourEnd = req.body.dateHourEnd; // ex "2021-04-03 18:34:48"
+            const maxNbPlaces = req.body.maxNbPlaces;
+            const pictureId = req.body.pictureId;
+            const zoneId = req.body.zoneId;
 
-        if (title === undefined || description === undefined || dateHourStart === undefined ||
-            dateHourEnd === undefined || maxNbPlaces === undefined || pictureId === undefined ||
-            zoneId === undefined) {
-            res.status(400).end("Veuillez renseigner les informations nécessaires");
-            return;
+            if (title === undefined || description === undefined || dateHourStart === undefined ||
+                dateHourEnd === undefined || maxNbPlaces === undefined || pictureId === undefined ||
+                zoneId === undefined) {
+                res.status(400).end("Veuillez renseigner les informations nécessaires");
+                return;
+            }
+
+            const dateHourCreation = DateUtils.getCurrentDate();
+
+            const creatorId = await getUserMailConnected(req);
+            if (creatorId instanceof LogError)
+                return LogError.HandleStatus(res, creatorId);
+
+            const statusId = await isAdministratorConnected(req) ? VALIDATED_STATUS : ON_ATTEMPT_STATUS;
+
+            const event = await eventService.createEvent({
+                eventId: id,
+                eventTitle: title,
+                eventDescription: description,
+                dateHourStart: dateHourStart,
+                dateHourEnd: dateHourEnd,
+                dateHourCreation: dateHourCreation,
+                eventMaxNbPlaces: maxNbPlaces,
+                eventPitureId: pictureId,
+                statusId: statusId,
+                creatorId: creatorId,
+                zoneId: zoneId
+            });
+
+            if (event instanceof LogError) {
+                LogError.HandleStatus(res, event);
+            } else {
+                res.status(201);
+                res.json(event);
+            }
         }
-
-        const dateHourCreation = DateUtils.getCurrentDate();
-
-        const creatorId = await getUserMailConnected(req);
-        if (creatorId instanceof LogError)
-            return LogError.HandleStatus(res, creatorId);
-
-        const statusId = await isAdministratorConnected(req) ? VALIDATED_STATUS : ON_ATTEMPT_STATUS;
-
-        const event = await eventService.createEvent({
-            eventId: id,
-            eventTitle: title,
-            eventDescription: description,
-            dateHourStart: dateHourStart,
-            dateHourEnd: dateHourEnd,
-            dateHourCreation: dateHourCreation,
-            eventMaxNbPlaces: maxNbPlaces,
-            eventPitureId: pictureId,
-            statusId: statusId,
-            creatorId: creatorId,
-            zoneId: zoneId
-        });
-
-        if (event instanceof LogError) {
-            LogError.HandleStatus(res, event);
-        } else {
-            res.status(201);
-            res.json(event);
-        }
+        res.status(403).end();
+    } catch (err) {
+        next(err);
     }
-    res.status(403).end();
 });
 
 /**
@@ -83,17 +86,21 @@ eventRouter.post("/add", authUserMiddleWare, async function (req, res, next) {
  * Nécessite d'être connecté : OUI
  */
 eventRouter.get("/", authUserMiddleWare, async function (req, res, next) {
-    const connection = await DatabaseUtils.getConnection();
-    const eventService = new EventServiceImpl(connection);
+    try {
+        const connection = await DatabaseUtils.getConnection();
+        const eventService = new EventServiceImpl(connection);
 
-    const limit = req.query.limit ? Number.parseInt(req.query.limit as string) : undefined;
-    const offset = req.query.offset ? Number.parseInt(req.query.offset as string) : undefined;
+        const limit = req.query.limit ? Number.parseInt(req.query.limit as string) : undefined;
+        const offset = req.query.offset ? Number.parseInt(req.query.offset as string) : undefined;
 
-    const eventList = await eventService.getAllValidatedEvents({
-        limit,
-        offset
-    });
-    res.json(eventList);
+        const eventList = await eventService.getAllValidatedEvents({
+            limit,
+            offset
+        });
+        res.json(eventList);
+    } catch (err) {
+        next(err);
+    }
 });
 
 /**
@@ -104,20 +111,24 @@ eventRouter.get("/", authUserMiddleWare, async function (req, res, next) {
  * Nécessite d'être connecté : OUI
  */
 eventRouter.get("/get/:id", authUserMiddleWare, async function (req, res, next) {
-    const connection = await DatabaseUtils.getConnection();
-    const eventService = new EventServiceImpl(connection);
+    try {
+        const connection = await DatabaseUtils.getConnection();
+        const eventService = new EventServiceImpl(connection);
 
-    const id = req.params.id;
+        const id = req.params.id;
 
-    if (id === undefined)
-        return res.status(400).end("Veuillez renseigner les informations nécessaires");
+        if (id === undefined)
+            return res.status(400).end("Veuillez renseigner les informations nécessaires");
 
-    const event = await eventService.getEventById(Number.parseInt(id));
+        const event = await eventService.getEventById(Number.parseInt(id));
 
-    if (event instanceof LogError)
-        LogError.HandleStatus(res, event);
-    else
-        res.json(event);
+        if (event instanceof LogError)
+            LogError.HandleStatus(res, event);
+        else
+            res.json(event);
+    } catch (err) {
+        next(err);
+    }
 });
 
 /**
@@ -128,40 +139,43 @@ eventRouter.get("/get/:id", authUserMiddleWare, async function (req, res, next) 
  * Nécessite d'être connecté : OUI
  */
 eventRouter.put("/update/:id", authUserMiddleWare, async function (req, res, next) {
-    //vérification droits d'accès
-    if (!await isBlockedUserConnected(req)) {
-        const id = req.params.id;
-        const title = req.body.title;
-        const description = req.body.description;
-        const dateHourStart = req.body.dateHourStart; // ex "2021-04-03 18:34:48"
-        const dateHourEnd = req.body.dateHourEnd; // ex "2021-04-03 18:34:48"
-        const maxNbPlaces = req.body.maxNbPlaces;
-        const pictureId = req.body.pictureId;
+    try {
+        if (!await isBlockedUserConnected(req)) {
+            const id = req.params.id;
+            const title = req.body.title;
+            const description = req.body.description;
+            const dateHourStart = req.body.dateHourStart; // ex "2021-04-03 18:34:48"
+            const dateHourEnd = req.body.dateHourEnd; // ex "2021-04-03 18:34:48"
+            const maxNbPlaces = req.body.maxNbPlaces;
+            const pictureId = req.body.pictureId;
 
-        if (id === undefined || (title === undefined && description === undefined && dateHourStart === undefined &&
-            dateHourEnd === undefined && maxNbPlaces === undefined && pictureId === undefined)) {
-            res.status(400).end("Veuillez renseigner les informations nécessaires");
-            return;
+            if (id === undefined || (title === undefined && description === undefined && dateHourStart === undefined &&
+                dateHourEnd === undefined && maxNbPlaces === undefined && pictureId === undefined)) {
+                res.status(400).end("Veuillez renseigner les informations nécessaires");
+                return;
+            }
+            const connection = await DatabaseUtils.getConnection();
+            const eventService = new EventServiceImpl(connection);
+
+            const event = await eventService.updateEvent({
+                eventId: Number.parseInt(id),
+                eventTitle: title,
+                eventDescription: description,
+                dateHourStart: dateHourStart,
+                dateHourEnd: dateHourEnd,
+                eventMaxNbPlaces: maxNbPlaces,
+                eventPitureId: pictureId
+            });
+
+            if (event instanceof LogError)
+                LogError.HandleStatus(res, event);
+            else
+                res.json(event);
         }
-        const connection = await DatabaseUtils.getConnection();
-        const eventService = new EventServiceImpl(connection);
-
-        const event = await eventService.updateEvent({
-            eventId: Number.parseInt(id),
-            eventTitle: title,
-            eventDescription: description,
-            dateHourStart: dateHourStart,
-            dateHourEnd: dateHourEnd,
-            eventMaxNbPlaces: maxNbPlaces,
-            eventPitureId: pictureId
-        });
-
-        if (event instanceof LogError)
-            LogError.HandleStatus(res, event);
-        else
-            res.json(event);
+        res.status(403).end();
+    } catch (err) {
+        next(err);
     }
-    res.status(403).end();
 });
 
 /**
@@ -172,23 +186,27 @@ eventRouter.put("/update/:id", authUserMiddleWare, async function (req, res, nex
  * Nécessite d'être connecté : OUI
  */
 eventRouter.delete("/delete/:id", authUserMiddleWare, async function (req, res, next) {
-    if (!await isBlockedUserConnected(req)) {
-        const connection = await DatabaseUtils.getConnection();
-        const eventService = new EventServiceImpl(connection);
+    try {
+        if (!await isBlockedUserConnected(req)) {
+            const connection = await DatabaseUtils.getConnection();
+            const eventService = new EventServiceImpl(connection);
 
-        const id = req.params.id;
+            const id = req.params.id;
 
-        if (id === undefined)
-            return res.status(400).end("Veuillez renseigner les informations nécessaires");
+            if (id === undefined)
+                return res.status(400).end("Veuillez renseigner les informations nécessaires");
 
-        const success = await eventService.deleteEventsById(Number.parseInt(id));
+            const success = await eventService.deleteEventsById(Number.parseInt(id));
 
-        if (success)
-            res.json(success);
-        else
-            res.status(404).end();
+            if (success)
+                res.json(success);
+            else
+                res.status(404).end();
+        }
+        res.status(403).end();
+    } catch (err) {
+        next(err);
     }
-    res.status(403).end();
 });
 
 /**
@@ -199,24 +217,28 @@ eventRouter.delete("/delete/:id", authUserMiddleWare, async function (req, res, 
  * Nécessite d'être connecté : OUI
  */
 eventRouter.post("/register/:id", authUserMiddleWare, async function (req, res, next) {
-    const connection = await DatabaseUtils.getConnection();
-    const eventService = new EventServiceImpl(connection);
+    try {
+        const connection = await DatabaseUtils.getConnection();
+        const eventService = new EventServiceImpl(connection);
 
-    const id = req.params.id;
+        const id = req.params.id;
 
-    if (id === undefined)
-        return res.status(400).end("Veuillez renseigner les informations nécessaires");
+        if (id === undefined)
+            return res.status(400).end("Veuillez renseigner les informations nécessaires");
 
-    const userMail = await getUserMailConnected(req);
-    if (userMail instanceof LogError)
-        return LogError.HandleStatus(res, userMail);
+        const userMail = await getUserMailConnected(req);
+        if (userMail instanceof LogError)
+            return LogError.HandleStatus(res, userMail);
 
-    const participants = await eventService.registerEvent(Number.parseInt(id), userMail);
+        const participants = await eventService.registerEvent(Number.parseInt(id), userMail);
 
-    if (participants instanceof LogError)
-        LogError.HandleStatus(res, participants);
-    else
-        res.json(participants);
+        if (participants instanceof LogError)
+            LogError.HandleStatus(res, participants);
+        else
+            res.json(participants);
+    } catch (err) {
+        next(err);
+    }
 });
 
 /**
@@ -227,24 +249,28 @@ eventRouter.post("/register/:id", authUserMiddleWare, async function (req, res, 
  * Nécessite d'être connecté : OUI
  */
 eventRouter.delete("/unregister/:id", authUserMiddleWare, async function (req, res, next) {
-    const connection = await DatabaseUtils.getConnection();
-    const eventService = new EventServiceImpl(connection);
+    try {
+        const connection = await DatabaseUtils.getConnection();
+        const eventService = new EventServiceImpl(connection);
 
-    const id = req.params.id;
+        const id = req.params.id;
 
-    if (id === undefined)
-        return res.status(400).end("Veuillez renseigner les informations nécessaires");
+        if (id === undefined)
+            return res.status(400).end("Veuillez renseigner les informations nécessaires");
 
-    const userMail = await getUserMailConnected(req);
-    if (userMail instanceof LogError)
-        return LogError.HandleStatus(res, userMail);
+        const userMail = await getUserMailConnected(req);
+        if (userMail instanceof LogError)
+            return LogError.HandleStatus(res, userMail);
 
-    const participants = await eventService.unregisterEvent(Number.parseInt(id), userMail);
+        const participants = await eventService.unregisterEvent(Number.parseInt(id), userMail);
 
-    if (participants instanceof LogError)
-        LogError.HandleStatus(res, participants);
-    else
-        res.json(participants);
+        if (participants instanceof LogError)
+            LogError.HandleStatus(res, participants);
+        else
+            res.json(participants);
+    } catch (err) {
+        next(err);
+    }
 });
 
 /**
@@ -255,19 +281,23 @@ eventRouter.delete("/unregister/:id", authUserMiddleWare, async function (req, r
  * Nécessite d'être connecté : OUI
  */
 eventRouter.get("/getPastEventsByUser", authUserMiddleWare, async function (req, res, next) {
-    const connection = await DatabaseUtils.getConnection();
-    const eventService = new EventServiceImpl(connection);
+    try {
+        const connection = await DatabaseUtils.getConnection();
+        const eventService = new EventServiceImpl(connection);
 
-    const mail = await getUserMailConnected(req);
-    if (mail instanceof LogError)
-        return LogError.HandleStatus(res, mail);
+        const mail = await getUserMailConnected(req);
+        if (mail instanceof LogError)
+            return LogError.HandleStatus(res, mail);
 
-    const events = await eventService.getPastEventsByUser(mail);
+        const events = await eventService.getPastEventsByUser(mail);
 
-    if (events instanceof LogError)
-        LogError.HandleStatus(res, events);
-    else
-        res.json(events);
+        if (events instanceof LogError)
+            LogError.HandleStatus(res, events);
+        else
+            res.json(events);
+    } catch (err) {
+        next(err);
+    }
 });
 
 /**
@@ -278,19 +308,23 @@ eventRouter.get("/getPastEventsByUser", authUserMiddleWare, async function (req,
  * Nécessite d'être connecté : OUI
  */
 eventRouter.get("/getFutureEventsByUser", authUserMiddleWare, async function (req, res, next) {
-    const connection = await DatabaseUtils.getConnection();
-    const eventService = new EventServiceImpl(connection);
+    try {
+        const connection = await DatabaseUtils.getConnection();
+        const eventService = new EventServiceImpl(connection);
 
-    const mail = await getUserMailConnected(req);
-    if (mail instanceof LogError)
-        return LogError.HandleStatus(res, mail);
+        const mail = await getUserMailConnected(req);
+        if (mail instanceof LogError)
+            return LogError.HandleStatus(res, mail);
 
-    const events = await eventService.getFutureEventsByUser(mail);
+        const events = await eventService.getFutureEventsByUser(mail);
 
-    if (events instanceof LogError)
-        LogError.HandleStatus(res, events);
-    else
-        res.json(events);
+        if (events instanceof LogError)
+            LogError.HandleStatus(res, events);
+        else
+            res.json(events);
+    } catch (err) {
+        next(err);
+    }
 });
 
 /**
@@ -301,19 +335,101 @@ eventRouter.get("/getFutureEventsByUser", authUserMiddleWare, async function (re
  * Nécessite d'être connecté : OUI
  */
 eventRouter.get("/getActualEventsByUser", authUserMiddleWare, async function (req, res, next) {
-    const connection = await DatabaseUtils.getConnection();
-    const eventService = new EventServiceImpl(connection);
+    try {
+        const connection = await DatabaseUtils.getConnection();
+        const eventService = new EventServiceImpl(connection);
 
-    const mail = await getUserMailConnected(req);
-    if (mail instanceof LogError)
-        return LogError.HandleStatus(res, mail);
+        const mail = await getUserMailConnected(req);
+        if (mail instanceof LogError)
+            return LogError.HandleStatus(res, mail);
 
-    const events = await eventService.getActualEventsByUser(mail);
+        const events = await eventService.getActualEventsByUser(mail);
 
-    if (events instanceof LogError)
-        LogError.HandleStatus(res, events);
-    else
-        res.json(events);
+        if (events instanceof LogError)
+            LogError.HandleStatus(res, events);
+        else
+            res.json(events);
+    } catch (err) {
+        next(err);
+    }
+});
+
+/**
+ * récupérer les événements validés
+ * URL : /event/getValidatedEvents
+ * Requete : GET
+ * ACCES : DEV
+ * Nécessite d'être connecté : OUI
+ */
+eventRouter.get("/getValidatedEvents", authUserMiddleWare, async function (req, res, next) {
+    try {
+        if (await isDevConnected(req)) {
+            const connection = await DatabaseUtils.getConnection();
+            const eventService = new EventServiceImpl(connection);
+
+            const events = await eventService.getValidatedEvents();
+
+            if (events instanceof LogError)
+                LogError.HandleStatus(res, events);
+            else
+                res.json(events);
+        }
+        res.status(403).end();
+    } catch (err) {
+        next(err);
+    }
+});
+
+/**
+ * récupérer les événements en attente
+ * URL : /event/getWaitingEvents
+ * Requete : GET
+ * ACCES : DEV
+ * Nécessite d'être connecté : OUI
+ */
+eventRouter.get("/getWaitingEvents", authUserMiddleWare, async function (req, res, next) {
+    try {
+        if (await isDevConnected(req)) {
+            const connection = await DatabaseUtils.getConnection();
+            const eventService = new EventServiceImpl(connection);
+
+            const events = await eventService.getWaitingEvents();
+
+            if (events instanceof LogError)
+                LogError.HandleStatus(res, events);
+            else
+                res.json(events);
+        }
+        res.status(403).end();
+    } catch (err) {
+        next(err);
+    }
+});
+
+/**
+ * récupérer les événements refusés
+ * URL : /event/getRefusedEvents
+ * Requete : GET
+ * ACCES : DEV
+ * Nécessite d'être connecté : OUI
+ */
+eventRouter.get("/getRefusedEvents", authUserMiddleWare, async function (req, res, next) {
+    try {
+        if (await isDevConnected(req)) {
+            const connection = await DatabaseUtils.getConnection();
+            const eventService = new EventServiceImpl(connection);
+
+            const events = await eventService.getRefusedEvents();
+
+            if (events instanceof LogError)
+                LogError.HandleStatus(res, events);
+            else
+                res.json(events);
+        }
+        res.status(403).end();
+    } catch (err) {
+        next(err);
+    }
 });
 
 /**
@@ -324,23 +440,27 @@ eventRouter.get("/getActualEventsByUser", authUserMiddleWare, async function (re
  * Nécessite d'être connecté : OUI
  */
 eventRouter.put("/accept/:id", authUserMiddleWare, async function (req, res, next) {
-    if (await isAdministratorConnected(req)) {
-        const connection = await DatabaseUtils.getConnection();
-        const eventService = new EventServiceImpl(connection);
+    try {
+        if (await isAdministratorConnected(req)) {
+            const connection = await DatabaseUtils.getConnection();
+            const eventService = new EventServiceImpl(connection);
 
-        const id = req.params.id;
+            const id = req.params.id;
 
-        if (id === undefined)
-            return res.status(400).end("Veuillez renseigner les informations nécessaires");
+            if (id === undefined)
+                return res.status(400).end("Veuillez renseigner les informations nécessaires");
 
-        const event = await eventService.acceptEvent(Number.parseInt(id));
+            const event = await eventService.acceptEvent(Number.parseInt(id));
 
-        if (event instanceof LogError)
-            LogError.HandleStatus(res, event);
-        else
-            res.json(event);
+            if (event instanceof LogError)
+                LogError.HandleStatus(res, event);
+            else
+                res.json(event);
+        }
+        res.status(403).end();
+    } catch (err) {
+        next(err);
     }
-    res.status(403).end();
 });
 
 /**
@@ -351,23 +471,27 @@ eventRouter.put("/accept/:id", authUserMiddleWare, async function (req, res, nex
  * Nécessite d'être connecté : OUI
  */
 eventRouter.put("/refuse/:id", authUserMiddleWare, async function (req, res, next) {
-    if (await isAdministratorConnected(req)) {
-        const connection = await DatabaseUtils.getConnection();
-        const eventService = new EventServiceImpl(connection);
+    try {
+        if (await isAdministratorConnected(req)) {
+            const connection = await DatabaseUtils.getConnection();
+            const eventService = new EventServiceImpl(connection);
 
-        const id = req.params.id;
+            const id = req.params.id;
 
-        if (id === undefined)
-            return res.status(400).end("Veuillez renseigner les informations nécessaires");
+            if (id === undefined)
+                return res.status(400).end("Veuillez renseigner les informations nécessaires");
 
-        const event = await eventService.refuseEvent(Number.parseInt(id));
+            const event = await eventService.refuseEvent(Number.parseInt(id));
 
-        if (event instanceof LogError)
-            LogError.HandleStatus(res, event);
-        else
-            res.json(event);
+            if (event instanceof LogError)
+                LogError.HandleStatus(res, event);
+            else
+                res.json(event);
+        }
+        res.status(403).end();
+    } catch (err) {
+        next(err);
     }
-    res.status(403).end();
 });
 
 /**

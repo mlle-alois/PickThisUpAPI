@@ -182,6 +182,27 @@ export class EventServiceImpl implements EventService {
     }
 
     /**
+     * récupérer les événements validés
+     */
+    async getValidatedEvents(): Promise<EventModel[]> {
+        return await this.eventController.getValidatedEvents();
+    }
+
+    /**
+     * récupérer les événements en attente
+     */
+    async getWaitingEvents(): Promise<EventModel[]> {
+        return await this.eventController.getWaitingEvents();
+    }
+
+    /**
+     * récupérer les événements refusés
+     */
+    async getRefusedEvents(): Promise<EventModel[]> {
+        return await this.eventController.getRefusedEvents();
+    }
+
+    /**
      * accepter un événement
      * @param eventId
      */
