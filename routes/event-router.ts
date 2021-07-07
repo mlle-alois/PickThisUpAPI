@@ -5,8 +5,7 @@ import {
     DateUtils,
     getUserMailConnected,
     isAdministratorConnected,
-    isBlockedUserConnected,
-    isDevConnected
+    isBlockedUserConnected
 } from "../Utils";
 import {EventServiceImpl} from "../services/impl";
 import {LogError} from "../models";

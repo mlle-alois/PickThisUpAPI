@@ -1,7 +1,7 @@
 import express from "express";
 import {DatabaseUtils} from "../database/database";
 import {authUserMiddleWare} from "../middlewares/auth-middleware";
-import {getUserMailConnected, isAdministratorConnected, isBlockedUserConnected, isDevConnected} from "../Utils";
+import {getUserMailConnected, isAdministratorConnected, isDevConnected} from "../Utils";
 import {UserServiceImpl} from "../services/impl";
 import {LogError} from "../models";
 

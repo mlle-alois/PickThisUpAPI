@@ -1,9 +1,7 @@
 import express from "express";
 import {DatabaseUtils} from "../database/database";
 import {authUserMiddleWare} from "../middlewares/auth-middleware";
-import {DateUtils, getUserMailConnected, isDevConnected} from "../Utils";
-import {StatusServiceImpl, TicketServiceImpl} from "../services/impl";
-import {LogError} from "../models";
+import {StatusServiceImpl} from "../services/impl";
 
 
 const statusRouter = express.Router();

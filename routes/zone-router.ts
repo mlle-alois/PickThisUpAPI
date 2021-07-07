@@ -1,11 +1,10 @@
 import express from "express";
 import {DatabaseUtils} from "../database/database";
 import {authUserMiddleWare} from "../middlewares/auth-middleware";
-import {getUserMailConnected, isAdministratorConnected, isBlockedUserConnected, isDevConnected} from "../Utils";
-import {ZoneServiceImpl} from "../services/impl";
+import {getUserMailConnected, isAdministratorConnected, isBlockedUserConnected} from "../Utils";
+import {MediaServiceImpl, ZoneServiceImpl} from "../services/impl";
 import {LogError} from "../models";
 import {ON_ATTEMPT_STATUS, VALIDATED_STATUS} from "../consts";
-import {MediaServiceImpl} from "../services/impl";
 
 const zoneRouter = express.Router();
 

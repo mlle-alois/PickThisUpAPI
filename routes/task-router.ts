@@ -265,7 +265,7 @@ taskRouter.delete("/delete/:id", authUserMiddleWare, async function (req, res, n
 
 /**
  * URL : /task/list/:id?limit={x}&offset={x}
- * Récupère toutes les tâches liés à une liste
+ * Récupère toutes les tâches liées à une liste
  * Requete : GET
  * ACCES : DEVELOPPEUR
  * Nécessite d'être connecté : OUI

@@ -1,11 +1,7 @@
 import express from "express";
 import {DatabaseUtils} from "../database/database";
 import {authUserMiddleWare} from "../middlewares/auth-middleware";
-import {
-    getUserMailConnected,
-    isBlockedUserConnected,
-    isDevConnected
-} from "../Utils";
+import {getUserMailConnected, isBlockedUserConnected} from "../Utils";
 import {CarpoolServiceImpl} from "../services/impl";
 import {LogError} from "../models";
 
@@ -132,7 +128,7 @@ carpoolRouter.put("/update/:id", authUserMiddleWare, async function (req, res, n
  * Nécessite d'être connecté : OUI
  */
 carpoolRouter.delete("/delete/:id", authUserMiddleWare, async function (req, res, next) {
-    if (await isDevConnected(req)) {
+    if (!await isBlockedUserConnected(req)) {
         const connection = await DatabaseUtils.getConnection();
         const carpoolService = new CarpoolServiceImpl(connection);
 
