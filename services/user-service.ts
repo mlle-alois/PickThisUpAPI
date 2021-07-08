@@ -16,6 +16,10 @@ export interface UserService {
 
     updateUser(options: UserUpdateProps): Promise<UserModel | LogError>;
 
+    updateUserStatus(mail: string, status: number): Promise<UserModel | LogError>;
+
+    deleteUserByMail(mail:string): Promise<Boolean>;
+
     //TODO à activer/implémenter au besoin
     /*createUser(options: UserModel): Promise<UserModel | LogError>;
 

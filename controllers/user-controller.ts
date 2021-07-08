@@ -298,7 +298,12 @@ export class UserController {
             setClause.push("user_phone_number = ?");
             params.push(options.phoneNumber);
         }
-        params.push(options.mail);
+        if (options.typeId !== undefined) {
+            setClause.push("user_type_id = ?");
+            params.push(options.typeId);
+        }
+
+            params.push(options.mail);
         try {
             const res = await this.connection.execute(`UPDATE USER SET ${setClause.join(", ")} WHERE user_mail = ?`, params);
             const headers = res[0] as ResultSetHeader;
@@ -313,17 +318,46 @@ export class UserController {
     }
 
     /**
+     * Modification du statut d'un utilisateur renseignées dans les paramètres
+     * @param mail
+     * @param status
+     */
+    async updateUserStatus(mail:string, status:number): Promise<UserModel | LogError> {
+        const setClause: string[] = [];
+        const params = [];
+
+
+        if (status !== undefined) {
+            setClause.push("status = ?");
+            params.push(status);
+
+        }
+        params.push(mail);
+        try {
+            const res = await this.connection.execute(`UPDATE USER SET ${setClause.join(", ")} WHERE user_mail = ?`, params);
+            const headers = res[0] as ResultSetHeader;
+            if (headers.affectedRows > 0) {
+                return this.getUserByMail(mail);
+            }
+            return new LogError({numError: 400, text: "The user update failed"});
+        } catch (err) {
+            console.error(err);
+            return new LogError({numError: 400, text: "The user update failed"});
+        }
+    }
+
+    /**
      * Suppression d'un utilisateur depuis son :
      * @param userId
      */
-    /*async deleteUserById(userId: number): Promise<boolean> {
+    async deleteUserByMail(mail: string): Promise<boolean> {
         try {
-            const res = await this.connection.query(`DELETE FROM USER WHERE user_id = ${userId}`);
+            const res = await this.connection.query(`DELETE FROM USER WHERE user_mail = "${mail}"`);
             const headers = res[0] as ResultSetHeader;
             return headers.affectedRows > 0;
         } catch (err) {
             console.error(err);
             return false;
         }
-    }*/
+    }
 }

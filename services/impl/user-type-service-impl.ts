@@ -1,5 +1,5 @@
-import {UserTypeController} from "../../controllers";
-import {LogError, UserTypeModel} from "../../models";
+import {UserGetAllOptions, UserTypeController} from "../../controllers";
+import {LogError, UserModel, UserTypeModel} from "../../models";
 import {Connection} from "mysql2/promise";
 import {UserTypeService} from "../user-type-service";
 
@@ -19,5 +19,13 @@ export class UserTypeServiceImpl implements UserTypeService {
      */
     getUserTypeById(userTypeId: number): Promise<UserTypeModel | LogError> {
         return this.userTypeController.getUserTypeById(userTypeId);
+    }
+
+    /**
+     * Récupération de toutes les types de users
+     * @param options? -> Limit et offset de la requete
+     */
+    async getAllUsersTypes(options?: UserGetAllOptions): Promise<UserTypeModel[]> {
+        return this.userTypeController.getUserTypes(options);
     }
 }
