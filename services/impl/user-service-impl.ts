@@ -11,6 +11,7 @@ export interface UserUpdateProps {
     name: string;
     firstname: string;
     phoneNumber: string;
+    typeId?: number;
 }
 
 export class UserServiceImpl implements UserService {
@@ -58,6 +59,7 @@ export class UserServiceImpl implements UserService {
         return await this.userController.getAllDevelopers(options);
     }
 
+
     /**
      * Récupération d'un user depuis son :
      * @param token
@@ -79,6 +81,20 @@ export class UserServiceImpl implements UserService {
     }
 
     /**
+     * Modification le statut d'un user renseignées dans les options
+     * @param mail
+     * @param status
+     */
+    async updateUserStatus(mail: string,status:number): Promise<UserModel | LogError> {
+        const user = await this.userController.getUserByMail(mail);
+        if (user instanceof LogError)
+            return user;
+
+        return await this.userController.updateUserStatus(mail,status);
+    }
+
+
+    /**
      * Création d'un user
      * @param options
      */
@@ -94,11 +110,11 @@ export class UserServiceImpl implements UserService {
      * suppression d'un user selon son id
      * @param mail
      */
-    /*async deleteUserByMail(mail: string): Promise<boolean> {
+    async deleteUserByMail(mail: string): Promise<boolean> {
         const user = await this.userController.getUserByMail(mail);
         if (user instanceof LogError)
             return false;
 
         return await this.userController.deleteUserByMail(mail);
-    }*/
+    }
 }
