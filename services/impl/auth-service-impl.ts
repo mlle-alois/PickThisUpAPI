@@ -58,8 +58,8 @@ export class AuthServiceImpl implements AuthService {
             return user;
 
         //génération de token depuis la date actuelle et le mail
-        const token = (await hash(Date.now() + mail, 5)).replace('/', '');
-
+        let token = await hash(Date.now() + mail, 5);
+        token = token.replace('/', '');
         try {
             //suppression des anciennes sessions non fermées
             await this.sessionController.deleteOldSessionsByUserMail(mail);
