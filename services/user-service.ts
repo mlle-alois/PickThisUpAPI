@@ -20,8 +20,7 @@ export interface UserService {
 
     deleteUserByMail(mail:string): Promise<Boolean>;
 
-    //TODO à activer/implémenter au besoin
     /*createUser(options: UserModel): Promise<UserModel | LogError>;
 
-    deleteUserByMail(mail: string): Promise<boolean>;;*/
+    deleteUserByMail(mail: string): Promise<boolean>;*/
 }
