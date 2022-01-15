@@ -26,7 +26,7 @@ export class AuthController {
 
     async createUser(properties: IUserCreationProps): Promise<UserModel | LogError> {
         try {
-            await this.connection.execute(`INSERT INTO USER (user_mail, user_password, user_name, user_firstname,
+            await this.connection.execute(`INSERT INTO ${UserController.userTable} (user_mail, user_password, user_name, user_firstname,
                                                              user_phone_number, user_type_id)
                                            VALUES (?, ?, ?, ?, ?, ?)`, [
                 properties.userMail,

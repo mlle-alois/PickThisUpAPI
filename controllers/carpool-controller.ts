@@ -1,6 +1,6 @@
 import {CarpoolModel, LogError, UserModel} from "../models";
 import {Connection, ResultSetHeader, RowDataPacket} from "mysql2/promise";
-import {UserGetAllOptions} from "./user-controller";
+import {UserController, UserGetAllOptions} from "./user-controller";
 import {DateUtils} from "../Utils";
 
 export interface CarpoolUpdateOptions {
@@ -186,7 +186,7 @@ export class CarpoolController {
                                                         user_firstname,
                                                         user_phone_number
                                                  FROM CARPOOL
-                                                          JOIN USER ON USER.user_mail = CARPOOL.conductor_id
+                                                          JOIN ${UserController.userTable} ON ${UserController.userTable}.user_mail = CARPOOL.conductor_id
                                                           LEFT JOIN RESERVE_USER_CARPOOL RUC ON RUC.carpool_id = CARPOOL.carpool_id
                                                  WHERE CARPOOL.event_id = ?
                                                  GROUP BY CARPOOL.carpool_id`, [
@@ -225,8 +225,8 @@ export class CarpoolController {
                                                         user_phone_number,
                                                         profile_picture_id,
                                                         user_type_id
-                                                 FROM USER
-                                                          JOIN RESERVE_USER_CARPOOL RUC ON RUC.user_id = USER.user_mail
+                                                 FROM ${UserController.userTable}
+                                                          JOIN RESERVE_USER_CARPOOL RUC ON RUC.user_id = ${UserController.userTable}.user_mail
                                                  WHERE carpool_id = ?`, [
             carpoolId
         ]);

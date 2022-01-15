@@ -1,6 +1,6 @@
 import {EventModel, LogError, MediaModel, UserModel, ZoneModel} from "../models";
 import {Connection, ResultSetHeader, RowDataPacket} from "mysql2/promise";
-import {UserGetAllOptions} from "./user-controller";
+import {UserController, UserGetAllOptions} from "./user-controller";
 import {DateUtils} from "../Utils";
 
 export interface EventGetAllOptions {
@@ -727,7 +727,7 @@ export class EventController {
                                                         user_phone_number,
                                                         profile_picture_id,
                                                         user_type_id
-                                                 FROM USER
+                                                 FROM ${UserController.userTable}
                                                           JOIN PARTICIPATE_USER_EVENT ON user_mail = user_id
                                                  WHERE event_id = ?`, [
             eventId

@@ -1,5 +1,6 @@
 import {TaskModel, LogError, UserModel} from "../models";
 import {Connection, ResultSetHeader, RowDataPacket} from "mysql2/promise";
+import {UserController} from "./user-controller";
 
 export interface TaskGetAllOptions {
     limit?: number;
@@ -340,9 +341,9 @@ export class TaskController {
                                                         user_phone_number,
                                                         profile_picture_id,
                                                         user_type_id
-                                                 FROM USER
+                                                 FROM ${UserController.userTable}
                                                           JOIN PARTICIPATE_USER_TASK
-                                                               ON PARTICIPATE_USER_TASK.user_id = USER.user_mail
+                                                               ON PARTICIPATE_USER_TASK.user_id = ${UserController.userTable}.user_mail
                                                  where task_id = ?`, [
             ticketId
         ]);
