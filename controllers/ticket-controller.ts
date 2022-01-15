@@ -1,5 +1,6 @@
 import {TicketModel, LogError, UserModel} from "../models";
 import {Connection, ResultSetHeader, RowDataPacket} from "mysql2/promise";
+import {UserController} from "./user-controller";
 
 export interface TicketGetAllOptions {
     limit?: number;
@@ -228,7 +229,7 @@ export class TicketController {
                                                         TICKET.priority_id,
                                                         creator_id
                                                  FROM TICKET
-                                                          JOIN USER ON USER.user_mail = TICKET.creator_id
+                                                          JOIN ${UserController.userTable} ON ${UserController.userTable}.user_mail = TICKET.creator_id
                                                           JOIN STATUS ON STATUS.status_id = TICKET.status_id
                                                           JOIN PRIORITY ON PRIORITY.priority_id = TICKET.priority_id
                                                  WHERE ticket_id LIKE '%${search}%'
@@ -266,9 +267,9 @@ export class TicketController {
                                                         user_phone_number,
                                                         profile_picture_id,
                                                         user_type_id
-                                                 FROM USER
+                                                 FROM ${UserController.userTable}
                                                           JOIN PARTICIPATE_USER_TICKET
-                                                               ON PARTICIPATE_USER_TICKET.user_id = USER.user_mail
+                                                               ON PARTICIPATE_USER_TICKET.user_id = ${UserController.userTable}.user_mail
                                                  where ticket_id = ?`, [
             ticketId
         ]);

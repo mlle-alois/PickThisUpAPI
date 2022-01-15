@@ -21,6 +21,7 @@ interface UserUpdateOptions {
 export class UserController {
 
     private connection: Connection;
+    public static userTable: string = "my_user";
 
     constructor(connection: Connection) {
         this.connection = connection;
@@ -43,9 +44,9 @@ export class UserController {
                                                         media_path,
                                                         USER_TYPE.user_type_id,
                                                         user_type_libelle
-                                                 FROM USER
-                                                          LEFT JOIN MEDIA ON MEDIA.media_id = USER.profile_picture_id
-                                                          JOIN USER_TYPE ON USER_TYPE.user_type_id = USER.user_type_id LIMIT ?, ?`, [
+                                                 FROM ${UserController.userTable}
+                                                          LEFT JOIN MEDIA ON MEDIA.media_id = ${UserController.userTable}.profile_picture_id
+                                                          JOIN USER_TYPE ON USER_TYPE.user_type_id = ${UserController.userTable}.user_type_id LIMIT ?, ?`, [
             offset,
             limit
         ]);
@@ -89,9 +90,9 @@ export class UserController {
                                                         media_path,
                                                         USER_TYPE.user_type_id,
                                                         user_type_libelle
-                                                 FROM USER
-                                                          LEFT JOIN MEDIA ON MEDIA.media_id = USER.profile_picture_id
-                                                          JOIN USER_TYPE ON USER_TYPE.user_type_id = USER.user_type_id
+                                                 FROM ${UserController.userTable}
+                                                          LEFT JOIN MEDIA ON MEDIA.media_id = ${UserController.userTable}.profile_picture_id
+                                                          JOIN USER_TYPE ON USER_TYPE.user_type_id = ${UserController.userTable}.user_type_id
                                                  where user_mail = ?`, [
             mail
         ]);
@@ -137,9 +138,9 @@ export class UserController {
                                                         media_path,
                                                         USER_TYPE.user_type_id,
                                                         user_type_libelle
-                                                 FROM USER
-                                                          LEFT JOIN MEDIA ON MEDIA.media_id = USER.profile_picture_id
-                                                          JOIN USER_TYPE ON USER_TYPE.user_type_id = USER.user_type_id
+                                                 FROM ${UserController.userTable}
+                                                          LEFT JOIN MEDIA ON MEDIA.media_id = ${UserController.userTable}.profile_picture_id
+                                                          JOIN USER_TYPE ON USER_TYPE.user_type_id = ${UserController.userTable}.user_type_id
                                                  where user_mail = ?`, [
             mail
         ]);
@@ -191,10 +192,10 @@ export class UserController {
                                                         media_path,
                                                         USER_TYPE.user_type_id,
                                                         user_type_libelle
-                                                 FROM USER
-                                                          LEFT JOIN MEDIA ON MEDIA.media_id = USER.profile_picture_id
-                                                          JOIN USER_TYPE ON USER_TYPE.user_type_id = USER.user_type_id
-                                                 WHERE USER.user_type_id = 1 LIMIT ?, ?`, [
+                                                 FROM ${UserController.userTable}
+                                                          LEFT JOIN MEDIA ON MEDIA.media_id = ${UserController.userTable}.profile_picture_id
+                                                          JOIN USER_TYPE ON USER_TYPE.user_type_id = ${UserController.userTable}.user_type_id
+                                                 WHERE ${UserController.userTable}.user_type_id = 1 LIMIT ?, ?`, [
             offset, limit
         ]);
         const data = res[0];
@@ -236,10 +237,10 @@ export class UserController {
                                                         media_path,
                                                         USER_TYPE.user_type_id,
                                                         user_type_libelle
-                                                 FROM USER
-                                                          LEFT JOIN MEDIA ON MEDIA.media_id = USER.profile_picture_id
-                                                          JOIN USER_TYPE ON USER_TYPE.user_type_id = USER.user_type_id
-                                                          JOIN SESSION on SESSION.user_id = USER.user_mail
+                                                 FROM ${UserController.userTable}
+                                                          LEFT JOIN MEDIA ON MEDIA.media_id = ${UserController.userTable}.profile_picture_id
+                                                          JOIN USER_TYPE ON USER_TYPE.user_type_id = ${UserController.userTable}.user_type_id
+                                                          JOIN SESSION on SESSION.user_id = ${UserController.userTable}.user_mail
                                                  where token = ?`, [
             token
         ]);
@@ -305,7 +306,7 @@ export class UserController {
 
             params.push(options.mail);
         try {
-            const res = await this.connection.execute(`UPDATE USER SET ${setClause.join(", ")} WHERE user_mail = ?`, params);
+            const res = await this.connection.execute(`UPDATE ${UserController.userTable} SET ${setClause.join(", ")} WHERE user_mail = ?`, params);
             const headers = res[0] as ResultSetHeader;
             if (headers.affectedRows > 0) {
                 return this.getUserByMail(options.mail);
@@ -334,7 +335,7 @@ export class UserController {
         }
         params.push(mail);
         try {
-            const res = await this.connection.execute(`UPDATE USER SET ${setClause.join(", ")} WHERE user_mail = ?`, params);
+            const res = await this.connection.execute(`UPDATE ${UserController.userTable} SET ${setClause.join(", ")} WHERE user_mail = ?`, params);
             const headers = res[0] as ResultSetHeader;
             if (headers.affectedRows > 0) {
                 return this.getUserByMail(mail);
@@ -352,7 +353,7 @@ export class UserController {
      */
     async deleteUserByMail(mail: string): Promise<boolean> {
         try {
-            const res = await this.connection.query(`DELETE FROM USER WHERE user_mail = "${mail}"`);
+            const res = await this.connection.query(`DELETE FROM ${UserController.userTable} WHERE user_mail = "${mail}"`);
             const headers = res[0] as ResultSetHeader;
             return headers.affectedRows > 0;
         } catch (err) {
