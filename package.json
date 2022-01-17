@@ -29,10 +29,11 @@
   "homepage": "https://github.com/mlle-alois/PickThisUpAPI#readme",
   "dependencies": {
     "@types/bcrypt": "^3.0.1",
+    "bcrypt": "^5.0.1",
     "bcrypt-nodejs": "^0.0.3",
     "cors": "^2.8.5",
-    "ts-node": "^10.4.0",
-    "dotenv": "^8.2.0"
+    "dotenv": "^8.2.0",
+    "ts-node": "^10.4.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.11",
