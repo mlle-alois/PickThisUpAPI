@@ -1,0 +1,1 @@
+{"version":3,"file":"media-model.js","sourceRoot":"","sources":["../../models/media-model.ts"],"names":[],"mappings":";;;AAKA,MAAa,UAAU;IAInB,YAAY,UAA2B;QACnC,IAAI,CAAC,OAAO,GAAG,UAAU,CAAC,OAAO,CAAC;QAClC,IAAI,CAAC,SAAS,GAAG,UAAU,CAAC,SAAS,CAAC;IAC1C,CAAC;CACJ;AARD,gCAQC"}

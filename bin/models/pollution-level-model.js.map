@@ -1,0 +1,1 @@
+{"version":3,"file":"pollution-level-model.js","sourceRoot":"","sources":["../../models/pollution-level-model.ts"],"names":[],"mappings":";;;AAKA,MAAa,mBAAmB;IAI5B,YAAY,UAAoC;QAC5C,IAAI,CAAC,gBAAgB,GAAG,UAAU,CAAC,gBAAgB,CAAC;QACpD,IAAI,CAAC,qBAAqB,GAAG,UAAU,CAAC,qBAAqB,CAAC;IAClE,CAAC;CACJ;AARD,kDAQC"}

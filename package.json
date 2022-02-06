@@ -4,9 +4,10 @@
   "description": "API du projet PickThisUp",
   "main": "index.js",
   "scripts": {
-    "start": "node dist/index.js",
+    "start": "node bin/index.js",
+    "build-ts": "tsc",
     "postinstall": "tsc",
-    "watch-node": "nodemon dist/index.js",
+    "watch-node": "nodemon bin/index.js",
     "watch-ts": "tsc -w",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -24,7 +25,7 @@
     "BDD",
     "Requetes"
   ],
-  "author": "Aloïs Zimmermann--Rosenthal, Mehdi Zerfaoui, Ichaï Chtitski",
+  "author": "Aloïs Zimmermann--Rosenthal, Ichaï Chtitski",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/mlle-alois/PickThisUpAPI/issues"
