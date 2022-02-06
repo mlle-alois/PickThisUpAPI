@@ -4,12 +4,10 @@
   "description": "API du projet PickThisUp",
   "main": "index.js",
   "scripts": {
-    "start": "node bin/index.js",
-    "build-ts": "tsc",
+    "start": "node dist/index.js",
     "postinstall": "tsc",
-    "watch-node": "nodemon bin/index.js",
-    "watch-ts": "tsc -w",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "watch-node": "nodemon dist/index.js",
+    "watch-ts": "tsc -w"
   },
   "engines": {
     "node": ">=14",
