@@ -3,12 +3,14 @@ config();
 import express, {Express} from "express";
 import {buildRoutes} from "./routes";
 import bodyParser from "body-parser";
+import path from "path";
 
 const app: Express = express();
 const cors = require('cors');
 
 app.use(cors());
 app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
 buildRoutes(app);
 
